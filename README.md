@@ -57,6 +57,6 @@ Now the cursor object is ready to use to make database queries. Don't forget to 
 ### **Remember**:
 we need to make a return redirection to a specific page after the sign up proccess. It may be `login` route for example. Or an error page acording to the current status. So you should play around with `try-except` blocks and `if` conditions.
 
-**Example scenario**: "This email address already in use!". What would you do in this situation?
+**Example scenario**: "This email address already in use!". What would you do in such a situation?
 
 
