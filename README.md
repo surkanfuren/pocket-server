@@ -5,7 +5,9 @@
 
 ## Running Flask App
 `pip install Flask`
+
 `export FLASK_DEBUG=1`
+
 `flask run`
 
 
