@@ -7,3 +7,7 @@
 Install **Flask**: `pip install Flask`
 
 Run **app.py**: `flask run`
+
+If it does not start in debug mode: `export FLASK_DEBUG=TRUE`
+
+then try to run it again.
