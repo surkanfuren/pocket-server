@@ -28,6 +28,12 @@
     .custom-nav {
         background-color: beige;
     }
+
+    .custom-btn {
+        background-color: #729d98;
+        border: none;
+    }
+
 </style>
 
 </head>
@@ -63,9 +69,8 @@
     </div>
 </div>
 
-<div class="full-width-container">
-    <img src="{{ url_for('static', filename='images/img.png') }}" style="width: 100%;" class="img-fluid">
-</div>
+<div class="full-width-container" style="height: 480px; background-image: url('{{ url_for('static', filename='images/img.png') }}');"></div>
+
 
 <div class="full-width-container-2">
     <div class="d-flex justify-content-center">
@@ -73,7 +78,7 @@
     </div>
 
     <div class="d-flex justify-content-center">
-        <button id="start" type="button" class="btn btn-secondary">Let's get started</button>
+        <button id="start" type="button" class="btn btn-secondary custom-btn">Let's get started</button>
     </div>
     <br>
 </div>
