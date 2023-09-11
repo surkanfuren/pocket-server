@@ -1,4 +1,4 @@
-# Starter Docs
+# Starter Docs 📓
 
 ## SQLite
 [Download here](https://download.sqlitebrowser.org/DB.Browser.for.SQLite-3.12.2-win64.msi)
@@ -48,11 +48,15 @@ But first, create a database connection and cursor object outside the route func
 conn = sqlite3.connect('database.db')
 cursor = conn.cursor()
 ```
-Note: if `database.db` file does not exist, `sqlite.connect()` function above will create one.
+### **Note**: if `database.db` file does not exist, `sqlite.connect()` function above will create one ⬆️
 
-Now the cursor object is ready to use to make database queries. Don't forget to create table first! For example, we need a table named **`users`** with minimum of two **columns**: `email` and `password`. (You can create any table you need in a empty python file to make queries)
+Now the cursor object is ready to use to make database queries. Don't forget to create table first! For example, we need a table named **`users`** with minimum of two **columns**: `email` and `password`. 
 
+(You can create any table you need in a empty python file to make queries)
 
+### **Remember**:
+we need to make a return redirection to a specific page after the sign up proccess. It may be `login` route for example. Or an error page acording to the current status. So you should play around with `try-except` blocks and `if` conditions.
 
+**Example scenario**: "This email address already in use!". What would you do in this situation?
 
 
