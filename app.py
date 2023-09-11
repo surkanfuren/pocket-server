@@ -1,8 +1,9 @@
 from flask import Flask, render_template, redirect
+import sqlite3
 
 app = Flask(__name__)
 
-# PAGE ROUTES
+# --------------- PAGE ROUTES ---------------
 
 @app.route('/')
 def index():
@@ -28,8 +29,13 @@ def pricing():
 def faq():
     return render_template('pages/faq.html')
 
-# FUNCTIONAL GATEWAYS...
+# --------------- PAGE ROUTES END ---------------
 
+
+# FUNCTIONAL ROUTES UNDER HERE
+
+
+# FUNCTIONAL ROUTES END
 
 if __name__ == '__main__':
     app.run(debug=True)
