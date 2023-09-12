@@ -71,7 +71,7 @@
 
     <div class="d-flex justify-content-center">
 
-        <form method="POST" action="/login-handler">
+        <form method="POST" action="/login">
               <div class="mb-3">
                 <input type="email" placeholder="Email address" class="form-control" name="email">
               </div>
@@ -84,12 +84,18 @@
               <div>
                   <p>Don't have an account?
                     <br>
-                    <a class="beautiful-link" href="/register">Sign up here</a></p>
+                    <a class="beautiful-link" href="/signup">Sign up here</a></p>
               </div>
 
         </form>
 
     </div>
+
+        <div class="d-flex justify-content-center">
+            {% if message %}
+                      <p>{{ message }}</p>
+                    {% endif %}
+        </div>
 
     <div class="container"><hr></div>
 
