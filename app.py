@@ -62,7 +62,7 @@ def login_handler():
     cursor.execute("SELECT user_id FROM users where user_mail =? AND user_pass =?",(email,password))
     search = cursor.fetchone()
     if search:
-
+        print('Merhaba abi')
     return redirect("/")
 
 # FUNCTIONAL GATEWAYS...
