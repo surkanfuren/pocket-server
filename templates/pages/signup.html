@@ -75,7 +75,7 @@
 
     <div class="d-flex justify-content-center">
 
-        <form method="POST" action="/sign-handler">
+        <form method="POST" action="/signup">
               <div class="mb-3">
                  <input type="email" placeholder="Your email address" class="form-control" id="email" name="email">
               </div>
@@ -83,16 +83,16 @@
                  <input type="password" placeholder="Create a new password" class="form-control" id="password" name="password">
               </div>
               <div class="d-flex justify-content-center">
-                  <button type="submit" class="btn btn-primary">Sign Up</button>
+                      <button type="submit" class="btn btn-primary">Sign Up</button>
               </div>
-
         </form>
-        {% if message %}
-<div class="d-flex justify-content-center mt-3">
-    <p>{{ message }}</p>
-</div>
-{% endif %}
+
     </div>
+        <div class="d-flex justify-content-center">
+            {% if message %}
+                      <p>{{ message }}</p>
+                    {% endif %}
+        </div>
 
     <div class="container"><hr></div>
 
@@ -103,4 +103,3 @@
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/js/bootstrap.bundle.min.js" integrity="sha384-HwwvtgBNo3bZJJLYd8oVXjrBZt8cqVSpeBNS5n7C8IVInixGAoxmnlMuBnhbgrkm" crossorigin="anonymous"></script>
 </body>
 </html>
-

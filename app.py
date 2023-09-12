@@ -1,15 +1,19 @@
-from flask import Flask, render_template, redirect, request
+from flask import Flask, render_template, redirect, request, session
 import sqlite3
 import hashlib
 
 app = Flask(__name__)
-#conn = sqlite3.connect('database.db',check_same_thread=False)
+app.secret_key = 'BAD_SECRET_KEY'
+
+# conn = sqlite3.connect('database.db',check_same_thread=False)
+
 try:
     conn = sqlite3.connect('database.db',check_same_thread=False)
+    cursor = conn.cursor()
     print("Connection succesfull")
 except sqlite3.Error as e:
     print(f"Connection error:{e}")
-cursor = conn.cursor()
+    cursor = conn.cursor()
 
 # PAGE ROUTES
 
@@ -21,9 +25,22 @@ def index():
 def login():
     return render_template('pages/login.html')
 
-@app.route('/signup')
+@app.route('/signup', methods=['GET', 'POST'])
 def signup():
-    return render_template('pages/signup.html')
+    message = None
+    if request.method == "POST":
+        email = request.form['email']
+        password_first = request.form['password']
+        password = hash_password(password_first)
+        if is_email_used(email):
+            message = "This e-mail is already in use. Please choose another mail or log in to your account!"
+        else:
+            session["mail_in_use"] = False
+            cursor.execute("INSERT INTO users(user_mail,user_pass) VALUES(?,?)", (email, password))
+            conn.commit()
+            return redirect("/login")
+
+    return render_template('pages/signup.html', message=message)
 
 @app.route('/about')
 def about():
@@ -37,18 +54,6 @@ def pricing():
 def faq():
     return render_template('pages/faq.html')
 
-@app.route('/sign-handler', methods=['POST'])
-def signup_handler():
-    email = request.form['email']
-    password_first = request.form['password']
-    password = hash_password(password_first)
-    if is_email_used(email):
-        message = "This e-mail is already in use. Please choose another mail or log in to your account!"
-        return render_template('pages/signup.html',message=message)
-    else:
-        cursor.execute("INSERT INTO users(user_mail,user_pass) VALUES(?,?)", (email, password))
-        conn.commit()
-    return redirect("/login")
 @app.route('/login-handler', methods=['POST'])
 def login_handler():
     email = request.form["email"]
@@ -56,6 +61,8 @@ def login_handler():
     password = hash_password(password_first)
     cursor.execute("SELECT user_id FROM users where user_mail =? AND user_pass =?",(email,password))
     search = cursor.fetchone()
+
+
     return redirect("/")
 
 # FUNCTIONAL GATEWAYS...
