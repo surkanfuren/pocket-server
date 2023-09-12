@@ -1,9 +1,11 @@
-from flask import Flask, render_template, redirect
+from flask import Flask, render_template, redirect, request
 import sqlite3
 
 app = Flask(__name__)
+conn = sqlite3.connect('database.db',check_same_thread=False)
+cursor = conn.cursor()
 
-# --------------- PAGE ROUTES ---------------
+# PAGE ROUTES
 
 @app.route('/')
 def index():
@@ -29,13 +31,28 @@ def pricing():
 def faq():
     return render_template('pages/faq.html')
 
-# --------------- PAGE ROUTES END ---------------
+@app.route('/sign-handler', methods=['POST'])
+def signup_handler():
+    email = request.form['email']
+    password = request.form['password']
+    try:
+        cursor.execute("INSERT INTO users(user_mail,user_pass) VALUES(?,?)", (email, password))
+        conn.commit()
+    except sqlite3.OperationalError:
+        cursor.execute("INSERT INTO users(user_mail,user_pass) VALUES(?,?)", (email, password))
+        conn.commit()
+    return redirect("/login")
+@app.route('/login-handler', methods=['POST'])
+def login_handler():
+    email = request.form["email"]
+    password = request.form["password"]
+    cursor.execute("SELECT user_id FROM users where user_mail =? AND user_pass =?",(email,password))
+    search = cursor.fetchone()
+    if search:
 
+    return redirect("/")
+# FUNCTIONAL GATEWAYS...
 
-# FUNCTIONAL ROUTES UNDER HERE
-
-
-# FUNCTIONAL ROUTES END
 
 if __name__ == '__main__':
     app.run(debug=True)

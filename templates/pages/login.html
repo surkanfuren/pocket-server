@@ -71,12 +71,12 @@
 
     <div class="d-flex justify-content-center">
 
-        <form>
+        <form method="POST" action="/login-handler">
               <div class="mb-3">
-                <input type="email" placeholder="Email address" class="form-control" id="exampleInputEmail1" aria-describedby="emailHelp">
+                <input type="email" placeholder="Email address" class="form-control" name="email">
               </div>
               <div class="mb-3" style="margin-bottom: 10px;">
-                <input type="password" placeholder="Password" class="form-control" id="exampleInputPassword1">
+                <input type="password" placeholder="Password" class="form-control" name="password">
               </div>
               <div class="d-flex justify-content-center">
                   <button type="submit" class="btn btn-primary">Log in</button>
