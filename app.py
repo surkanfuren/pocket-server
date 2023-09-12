@@ -1,5 +1,6 @@
 from flask import Flask, render_template, redirect, request
 import sqlite3
+import hashlib
 
 app = Flask(__name__)
 #conn = sqlite3.connect('database.db',check_same_thread=False)
@@ -39,7 +40,8 @@ def faq():
 @app.route('/sign-handler', methods=['POST'])
 def signup_handler():
     email = request.form['email']
-    password = request.form['password']
+    password_first = request.form['password']
+    password = hash_password(password_first)
     if is_email_used(email):
         message = "This e-mail is already in use. Please choose another mail or log in to your account!"
         return render_template('pages/signup.html',message=message)
@@ -50,10 +52,11 @@ def signup_handler():
 @app.route('/login-handler', methods=['POST'])
 def login_handler():
     email = request.form["email"]
-    password = request.form["password"]
+    password_first = request.form["password"]
+    password = hash_password(password_first)
     cursor.execute("SELECT user_id FROM users where user_mail =? AND user_pass =?",(email,password))
     search = cursor.fetchone()
-    #if search:
+
 
     return redirect("/")
 
@@ -62,6 +65,12 @@ def is_email_used(email):
     cursor.execute("SELECT user_id FROM users WHERE user_mail=?",(email,))
     already_registered = cursor.fetchone()
     return already_registered is not None
+
+def hash_password(password):
+    sha256 = hashlib.sha256()
+    sha256.update(password.encode('utf-8'))
+    hashed_password = sha256.hexdigest()
+    return hashed_password
 
 if __name__ == '__main__':
     app.run(debug=True)
