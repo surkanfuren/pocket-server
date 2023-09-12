@@ -87,7 +87,11 @@
               </div>
 
         </form>
-
+        {% if message %}
+<div class="d-flex justify-content-center mt-3">
+    <p>{{ message }}</p>
+</div>
+{% endif %}
     </div>
 
     <div class="container"><hr></div>
