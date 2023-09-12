@@ -61,6 +61,8 @@ def login_handler():
     password = hash_password(password_first)
     cursor.execute("SELECT user_id FROM users where user_mail =? AND user_pass =?",(email,password))
     search = cursor.fetchone()
+
+
     return redirect("/")
 
 # FUNCTIONAL GATEWAYS...
