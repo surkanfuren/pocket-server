@@ -1,9 +1,15 @@
-from flask import Flask, render_template, redirect, request, session, url_for
+from flask import Flask, render_template, redirect, request, session, url_for, abort
+from captcha.image import ImageCaptcha
 import sqlite3
 import hashlib
+import requests
 
+image = ImageCaptcha()
 app = Flask(__name__)
 app.secret_key = 'BAD_SECRET_KEY'
+SITE_KEY = '6LcQYCAoAAAAAOgAINJ8ADaa__cZ0fa1Wma0xMfj'
+SECRET_KEY = '6LcQYCAoAAAAAAffYuj7YF-ELt4MBxc71mBkmBQR'
+VERIFY_URL = 'https://www.google.com/recaptcha/api/siteverify'
 
 try:
     conn = sqlite3.connect('database.db', check_same_thread=False)
@@ -20,32 +26,51 @@ except sqlite3.Error as e:
 def index():
     return render_template('pages/index.html')
 
+
 @app.route('/login', methods=['GET', 'POST'])
 def login():
+
+    if session.get('logged_in'):
+        return redirect(url_for('dashboard'))
     message = None
     if request.method == "POST":
+        print(request.form)
+        secret_response = request.form.get('g-recaptcha-response', False)
+        verify_response = requests.post(url=f'{VERIFY_URL}?secret={SECRET_KEY}&response={secret_response}').json()
+        if verify_response['success'] == False:
+            abort(401)
         email = request.form["email"]
         password_first = request.form["password"]
         password = hash_password(password_first)
-
         cursor.execute("SELECT * FROM users WHERE user_mail =? AND user_pass =?", (email, password))
         user = cursor.fetchone()
 
         if user is None:
             message = "Wrong email or password. Please check your credentials."
-            session["logged_in"] = False
+            session['login_attempts'] = session.get('login_attempts', 0) + 1
+
         else:
             session["logged_in"] = True
             session["id"] = user[0]
             session["email"] = user[1]
+            session.pop('login_attempts', None)
             return redirect(url_for('dashboard'))
 
-    return render_template('pages/login.html', message=message)
+
+
+    return render_template('pages/login.html', message=message,site_key=SITE_KEY)
 
 @app.route('/signup', methods=['GET', 'POST'])
 def signup():
+    if session.get('logged_in'):
+        return redirect(url_for('dashboard'))
     message = None
     if request.method == "POST":
+        print(request.form)
+        secret_response = request.form.get('g-recaptcha-response', False)
+        verify_response = requests.post(url=f'{VERIFY_URL}?secret={SECRET_KEY}&response={secret_response}').json()
+        if verify_response['success'] == False:
+            abort(401)
         email = request.form['email']
         password_first = request.form['password']
         password = hash_password(password_first)
@@ -57,7 +82,7 @@ def signup():
             conn.commit()
             return redirect("/login")
 
-    return render_template('pages/signup.html', message=message)
+    return render_template('pages/signup.html', message=message,site_key=SITE_KEY)
 
 @app.route('/dashboard', methods=['GET', 'POST'])
 def dashboard():
@@ -104,6 +129,8 @@ def hash_password(password):
     sha256.update(password.encode('utf-8'))
     hashed_password = sha256.hexdigest()
     return hashed_password
+##def checkCorrectness:
+      # PASS,CAPTCHA CORRECTNESS
 
 
 if __name__ == '__main__':
