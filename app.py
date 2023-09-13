@@ -1,17 +1,25 @@
 from flask import Flask, render_template, redirect, request, session, url_for, abort
-from captcha.image import ImageCaptcha
+from flask_mail import Mail, Message
 import sqlite3
 import hashlib
 import requests
 from dotenv import load_dotenv
 import os
 
+app = Flask(__name__)
+
 load_dotenv()
 
-app = Flask(__name__)
 app.secret_key = 'BAD_SECRET_KEY'
 SITE_KEY = '6LfiYiEoAAAAAHojsCOY72WzNTGbFjZKIYFdhGPW'
 VERIFY_URL = 'https://www.google.com/recaptcha/api/siteverify'
+app.config['MAIL_SERVER'] = 'smtp.elasticemail.com'
+app.config['MAIL_PORT'] = 2525
+app.config['MAIL_USERNAME'] = 'fourthandel@smtp.com'
+app.config['MAIL_PASSWORD'] = os.getenv("MAIL_PASS")
+app.config['MAIL_USE_TLS'] = False
+app.config['MAIL_USE_SSL'] = True
+mail = Mail(app)
 
 try:
     conn = sqlite3.connect('database.db', check_same_thread=False)
@@ -49,13 +57,13 @@ def login():
 
         if user is None:
             message = "Wrong email or password. Please check your credentials."
-            session['login_attempts'] = session.get('login_attempts', 0) + 1
+            #No use of this now, saving for later use## session['login_attempts'] = session.get('login_attempts', 0) + 1
 
         else:
             session["logged_in"] = True
             session["id"] = user[0]
             session["email"] = user[1]
-            session.pop('login_attempts', None)
+            #No use of this now, saving for later use## session.pop('login_attempts', None)
             return redirect(url_for('dashboard'))
 
 
@@ -122,9 +130,26 @@ def pricing():
 @app.route('/faq')
 def faq():
     return render_template('pages/faq.html')
-@app.route('/forgot')
+
+@app.route('/forgot', methods=['GET', 'POST'])
 def forgot():
-    return render_template('pages/forgot.html')
+    if session.get('logged_in'):
+        return redirect(url_for('dashboard'))
+    message = None
+    if request.method == "POST":
+        email = request.form["email"]
+        cursor.execute("SELECT * FROM users WHERE user_mail =?", (email,))
+        user = cursor.fetchone()
+        if user is None:
+            message = "There are no users registered with this e-mail, try registering instead!"
+
+        else:
+           print("Recovering password!")
+            msg= Message("Hey",sender='noreply@demo.com',recipients=['berkayygemici@gmail.com'])
+            msg.body="Hey how r u"
+            mail.send(msg)
+            return "Sent Email"
+    return render_template('pages/forgot.html', message=message)
 
 # __________________________________________________ FUNCTIONAL ROUTES __________________________________________________ #
 
