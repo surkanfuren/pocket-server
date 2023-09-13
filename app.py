@@ -67,6 +67,7 @@ def signup():
     if session.get('logged_in'):
         return redirect(url_for('dashboard'))
     message = None
+    emptyMessage = None
     if request.method == "POST":
         print(request.form)
         secret_response = request.form.get('g-recaptcha-response', False)
@@ -80,14 +81,14 @@ def signup():
         if is_email_used(email):
             message = "This email is already in use. Please choose another mail or log in to your account!"
         if (email == ''):
-            message = "Your e-mail can not be empty!"
+            emptyMessage = "Your e-mail can not be empty!"
         else:
             session["mail_in_use"] = False
             cursor.execute("INSERT INTO users(user_mail,user_pass) VALUES(?,?)", (email, password))
             conn.commit()
             return redirect("/login")
 
-    return render_template('pages/signup.html', message=message,site_key=SITE_KEY)
+    return render_template('pages/signup.html', message=message,site_key=SITE_KEY, emptyMessage=emptyMessage)
 
 @app.route('/dashboard', methods=['GET', 'POST'])
 def dashboard():
