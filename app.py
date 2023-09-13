@@ -64,7 +64,6 @@ def login():
 
 @app.route('/signup', methods=['GET', 'POST'])
 def signup():
-    print(os.getenv("SECRET_KEY"))
     if session.get('logged_in'):
         return redirect(url_for('dashboard'))
     message = None
@@ -77,8 +76,11 @@ def signup():
         email = request.form['email']
         password_first = request.form['password']
         password = hash_password(password_first)
+        print(email)
         if is_email_used(email):
             message = "This email is already in use. Please choose another mail or log in to your account!"
+        if (email == ''):
+            message = "Your e-mail can not be empty!"
         else:
             session["mail_in_use"] = False
             cursor.execute("INSERT INTO users(user_mail,user_pass) VALUES(?,?)", (email, password))
@@ -119,6 +121,9 @@ def pricing():
 @app.route('/faq')
 def faq():
     return render_template('pages/faq.html')
+@app.route('/forgot')
+def forgot():
+    return render_template('pages/forgot.html')
 
 # __________________________________________________ FUNCTIONAL ROUTES __________________________________________________ #
 
