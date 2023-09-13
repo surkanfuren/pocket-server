@@ -3,11 +3,14 @@ from captcha.image import ImageCaptcha
 import sqlite3
 import hashlib
 import requests
+from dotenv import load_dotenv
+import os
+
+load_dotenv()
 
 app = Flask(__name__)
 app.secret_key = 'BAD_SECRET_KEY'
-SITE_KEY = '6LcQYCAoAAAAAOgAINJ8ADaa__cZ0fa1Wma0xMfj'
-SECRET_KEY = '6LcQYCAoAAAAAAffYuj7YF-ELt4MBxc71mBkmBQR'
+SITE_KEY = '6LfiYiEoAAAAAHojsCOY72WzNTGbFjZKIYFdhGPW'
 VERIFY_URL = 'https://www.google.com/recaptcha/api/siteverify'
 
 try:
@@ -35,7 +38,7 @@ def login():
     if request.method == "POST":
         print(request.form)
         secret_response = request.form.get('g-recaptcha-response', False)
-        verify_response = requests.post(url=f'{VERIFY_URL}?secret={SECRET_KEY}&response={secret_response}').json()
+        verify_response = requests.post(url=f'{VERIFY_URL}?secret={os.getenv("SECRET_KEY")}&response={secret_response}').json()
         if verify_response['success'] == False:
             abort(401)
         email = request.form["email"]
@@ -61,13 +64,14 @@ def login():
 
 @app.route('/signup', methods=['GET', 'POST'])
 def signup():
+    print(os.getenv("SECRET_KEY"))
     if session.get('logged_in'):
         return redirect(url_for('dashboard'))
     message = None
     if request.method == "POST":
         print(request.form)
         secret_response = request.form.get('g-recaptcha-response', False)
-        verify_response = requests.post(url=f'{VERIFY_URL}?secret={SECRET_KEY}&response={secret_response}').json()
+        verify_response = requests.post(url=f'{VERIFY_URL}?secret={os.getenv("SECRET_KEY")}&response={secret_response}').json()
         if verify_response['success'] == False:
             abort(401)
         email = request.form['email']
