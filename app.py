@@ -142,13 +142,12 @@ def forgot():
         user = cursor.fetchone()
         if user is None:
             message = "There are no users registered with this e-mail, try registering instead!"
-
         else:
            print("Recovering password!")
             msg= Message("Hey",sender='noreply@demo.com',recipients=['berkayygemici@gmail.com'])
             msg.body="Hey how r u"
             mail.send(msg)
-            return "Sent Email"
+        return "Sent Email"
     return render_template('pages/forgot.html', message=message)
 
 # __________________________________________________ FUNCTIONAL ROUTES __________________________________________________ #
