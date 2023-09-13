@@ -4,7 +4,6 @@ import sqlite3
 import hashlib
 import requests
 
-image = ImageCaptcha()
 app = Flask(__name__)
 app.secret_key = 'BAD_SECRET_KEY'
 SITE_KEY = '6LcQYCAoAAAAAOgAINJ8ADaa__cZ0fa1Wma0xMfj'
@@ -129,8 +128,6 @@ def hash_password(password):
     sha256.update(password.encode('utf-8'))
     hashed_password = sha256.hexdigest()
     return hashed_password
-##def checkCorrectness:
-      # PASS,CAPTCHA CORRECTNESS
 
 
 if __name__ == '__main__':
