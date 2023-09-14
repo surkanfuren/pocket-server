@@ -5,6 +5,7 @@ import hashlib
 import requests
 from dotenv import load_dotenv
 import os
+import json
 
 app = Flask(__name__)
 
@@ -47,7 +48,7 @@ def login():
         print(request.form)
         secret_response = request.form.get('g-recaptcha-response', False)
         verify_response = requests.post(url=f'{VERIFY_URL}?secret={os.getenv("SECRET_KEY")}&response={secret_response}').json()
-        if verify_response['success'] == False:
+        if not verify_response['success']:
             abort(401)
         email = request.form["email"]
         password_first = request.form["password"]
@@ -87,7 +88,7 @@ def signup():
         password = hash_password(password_first)
         print(email)
         if is_email_used(email):
-            message = "This email is already in use. Please choose another mail or log in to your account!"
+            message = "This email is already in use. Please choose another email or log in to your account!"
         if (email == ''):
             emptyMessage = "Your e-mail can not be empty!"
         else:
@@ -135,6 +136,7 @@ def faq():
 def forgot():
     if session.get('logged_in'):
         return redirect(url_for('dashboard'))
+
     message = None
     if request.method == "POST":
         email = request.form["email"]
@@ -143,11 +145,28 @@ def forgot():
         if user is None:
             message = "There are no users registered with this e-mail, try registering instead!"
         else:
-           print("Recovering password!")
-            msg= Message("Hey",sender='noreply@demo.com',recipients=['berkayygemici@gmail.com'])
-            msg.body="Hey how r u"
-            mail.send(msg)
-        return "Sent Email"
+            username = email.split("@")[0]
+            print("Recovering password!")
+
+            # Lambda API Call
+            endpoint = "https://njlzm7rsm9.execute-api.eu-north-1.amazonaws.com/default/forgotPasswordEmail"
+            headers = {"Content-Type": "application/json"}
+
+            # Sending mail data to endpoint with POST request
+            payload = {"subject": "Fourthand password recovery", "message_body": f"Dear {username}, we'll save your password soon!", "destination": [email]}
+            payload_json = json.dumps(payload)
+            response = requests.post(endpoint, data=payload_json, headers=headers)
+
+            # Receiving response status
+            if response.status_code == 200:
+                print("Request successful!")
+                print("----------------------------------------------------------------------------------------------------")
+                print("Response:", response.text)
+                print("----------------------------------------------------------------------------------------------------")
+            else:
+                print("Request failed. Status code:", response.status_code)
+                print("Response:", response.text)
+
     return render_template('pages/forgot.html', message=message)
 
 # __________________________________________________ FUNCTIONAL ROUTES __________________________________________________ #
