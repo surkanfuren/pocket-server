@@ -74,7 +74,7 @@
     </div>
 
     <div class="container"><hr></div>
-
+        {% if not pinCode %}
     <div class="d-flex justify-content-center">
         <form id="sign-up-form" method="POST" action="/forgot">
               <div class="mb-3">
@@ -85,6 +85,22 @@
               </div>
         </form>
     </div>
+        {% endif %}
+        {% if pinCode %}
+    <div class="d-flex justify-content-center">
+        <form id="sign-ups-form" method="POST" action="/verification">
+              <div class="mb-3">
+                <input type="text" placeholder="Write 6 digit code" class="form-control" name="code">
+              </div>
+              <div class="d-flex justify-content-center">
+                  <button type="submit" class="g-recaptcha btn btn-primary" data-callback='onSubmit' data-action='submit' id="codeSender" name="codeSender">Submit</button>
+              </div>
+        </form>
+    </div>
+        {% endif %}
+
+
+
 
 
         <div class="d-flex justify-content-center">

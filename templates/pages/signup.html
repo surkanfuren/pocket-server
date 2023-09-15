@@ -83,13 +83,13 @@
 
         <form id="sign-up-form" method="POST" action="/signup">
               <div class="mb-3">
-                 <input type="email" placeholder="Your email address" class="form-control" id="email" name="email" oninput="checkEmail()" required>
+                 <input type="email" placeholder="Your email address" class="form-control" id="email" name="email" oninput="checkEmail()" aria-describedby="emailHelp">
               </div>
               <div class="mb-3" style="margin-bottom: 10px;">
                  <input type="password" placeholder="Create a new password" class="form-control" id="password" name="password" oninput="checkPassword()" required>
               </div>
               <div class="d-flex justify-content-center">
-                      <button type="submit" class="g-recaptcha btn btn-primary" data-sitekey="{{site_key}}" data-callback='onSubmit' data-action='submit' name="g-recaptcha-response">Sign Up</button>
+                      <button type="submit" class="g-recaptcha btn btn-primary" data-sitekey="{{site_key}}" data-callback='onSubmit' data-action='submit' id="signup" name="g-recaptcha-response">Sign Up</button>
               </div>
         </form>
 

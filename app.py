@@ -94,9 +94,10 @@ def signup():
         password_first = request.form['password']
         password = hash_password(password_first)
         print(email)
+        print(is_email_used(email))
         if is_email_used(email):
             message = "This email is already in use. Please choose another email or log in to your account!"
-        if email == '':
+        elif email == '':
             empty_message = "Your e-mail can not be empty!"
         else:
             session["mail_in_use"] = False
@@ -153,9 +154,11 @@ def faq():
 
 @app.route('/forgot', methods=['GET', 'POST'])
 def forgot():
+
     if session.get('logged_in'):
         return redirect(url_for('dashboard'))
-
+    pinCode = False
+    session['pincode'] =pinCode
     message = None
     if request.method == "POST":
         email = request.form["email"]
@@ -164,6 +167,7 @@ def forgot():
         if user is None:
             message = "There are no users registered with this e-mail, try registering instead!"
         else:
+            pinCode= True
             username = email.split("@")[0]
             print("Recovering password!")
 
@@ -186,8 +190,16 @@ def forgot():
                 print("Request failed. Status code:", response.status_code)
                 print("Response:", response.text)
 
-    return render_template('pages/forgot.html', message=message)
+    return render_template('pages/forgot.html', message=message,pinCode=pinCode)
+@app.route('/verification', methods=['GET', 'POST'])
+def verification():
+    if request.method == "POST":
+        code = request.form['code']
+        print(code)
+        if code == '12345':
+            #return redirect("/forgot") şifre sıfırlama sekmesi
 
+    return render_template('pages/forgot.html')
 # __________________________________________________ FUNCTIONAL ROUTES __________________________________________________ #
 
 def is_email_used(email):
