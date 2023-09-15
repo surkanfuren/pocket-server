@@ -137,6 +137,7 @@ def dashboard():
         cursor.execute("INSERT INTO products (user_id, product_name) VALUES (?, ?)", (user_id, product))
         conn.commit()
 
+
     cursor.execute("SELECT product_name FROM products WHERE user_id = ?", (user_id,))
     products = cursor.fetchall()
 
@@ -151,6 +152,38 @@ def phone_number():
     number = session["phone_number"]
 
     return render_template('pages/phone_number.html', username=username, number=number)
+
+@app.route('/profile',methods=['GET','POST'])
+def profile():
+    if not session.get('logged_in'):
+        return redirect(url_for('login'))
+
+    error_message = None
+    sucess_message = None
+    username = session["username"]
+    if request.method == "POST" :
+        print(request.form)
+        if "phone_change" in request.form:
+            print("burda1-telfn")
+            new_phone =request.form.get("phone_change")
+            cursor.execute("UPDATE users SET phone_number =? WHERE user_id =?",(new_phone,session["id"]))
+            conn.commit()
+            session["phone_number"] = new_phone
+            sucess_message = "Phone changed successfully"
+        elif 'password_control_one' in request.form:
+            print("burda1-pass")
+            control_one = request.form.get("password_control_one")
+            control_two = request.form.get("password_control_two")
+            if control_two != control_one:
+                error_message= "The passwords you entered must match!"
+
+            if not is_strong_password(control_one):
+                error_message = "Password must be at least 6 chars"
+            hashed_new_pass = hash_password(control_one)
+            cursor.execute("UPDATE users SET user_pass=? WHERE user_id=?",(hashed_new_pass,session["id"]))
+            conn.commit()
+            sucess_message = "Password changed successfully"
+    return render_template('pages/profile.html', username=username, number=session["phone_number"],error_message=error_message,sucess_message=sucess_message)
 
 @app.route('/about')
 def about():
@@ -238,8 +271,14 @@ def logout():
     if not session.get('logged_in'):
         abort(401)
     else:
-        session["logged_in"] = False
+        #session["logged_in"] = False
+        session.clear()
         return redirect(url_for('login'))
+def is_strong_password(password):
+    if len(password) > 5:
+        return True
+
+
 
 
 if __name__ == '__main__':

@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Dashboard · {{ username }}</title>
+    <title>Profile · {{ username }}</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-4bw+/aepP/YC94hEpVNVgiZdgIC5+VKNBQNGCHeKRQN+PtmoHDEXuppvnDJzQIu9" crossorigin="anonymous">
     <link href='https://fonts.googleapis.com/css?family=Montserrat' rel='stylesheet'>
 <style>
@@ -41,6 +41,7 @@
 
 <nav class="navbar navbar-expand-lg fixed-top custom-nav">
   <div class="container">
+      <a class="navbar-brand" href="/dashboard">Dashboard</a>
     <div class="collapse navbar-collapse" id="navbarText">
       <ul class="navbar-nav ms-auto mb-2 mb-lg-0">
         <li class="nav-item">
@@ -65,37 +66,61 @@
 
         <div class="row">
             <div class="col-sm-8">
-                <h1 style="font-family: Montserrat;">Dashboard | {{ username }}</h1>
-            </div>
-            <div class="col-sm-4">
-                <h1 style="font-family: Montserrat;">Tracked products;</h1>
-                <hr>
+                <h1 style="font-family: Montserrat;">Profile | {{ username }}</h1>
             </div>
         </div>
 
         <div class="row">
             <div class="col-sm-8">
                 <div class="col-sm-6">
-                    <h2 style="font-family: Montserrat;">Search anything you want</h2>
+                    <br><br>
+                    <h2 style="font-family: Montserrat;">Change your profile information</h2>
+                    <br><br>
+                    <div class="d-flex justify-content-center">
+                            <h4 style="font-family: Montserrat;">Current  Phone Number: {{number}}</h4>
 
-                    <form method="POST" action="/dashboard">
+                    </div>
+                    <h4 style="font-family: Montserrat;">Change Phone</h4>
+                    <form name=phone_editor method="POST" action="/profile">
                         <div class="input-group mb-2">
-                            <input type="text" placeholder="Renault Twingo" class="form-control" id="product" name="product" onkeyup="checkInput()">
-                            <div class="input-group-append">
-                                <button type="submit" class="btn btn-primary" id="track" disabled>Track</button>
+                            <div class="mb-3">
+                    <input type="number" placeholder="New Phone Number" class="form-control" name="phone_change">
+                </div>
+
+                            <div class="d-flex justify-content-center">
+                                <div class="input-group-append">
+                                <button type="submit" class="btn btn-primary" id="change" >Change Number</button>
+                                    <br><br>
+
                             </div>
+
+                    </div>
+                             <h4 style="font-family: Montserrat;">Change Password</h4>
+
                         </div>
                     </form>
+                    <form name="password_editor" method="POST" action="/profile">
+    <div class="mb-3">
+        <input type="password" placeholder="New Password" class="form-control" name="password_control_one">
+        <br><br>
+        <input type="password" placeholder="New Password Again" class="form-control" name="password_control_two">
+    </div>
+    <div class="input-group-append">
+        <button type="submit" class="btn btn-primary" id="pass_change" >Change Password</button>
+    </div>
+</form>
 
                 </div>
-                <div class="col-sm-6">
-
-                </div>
+<div class="d-flex justify-content-center">
+            {% if error_message %}
+                      <p>{{ error_message }}</p>
+                    {% endif %}
+        </div>
+                    <div class="col-sm-8">
+                {% if sucess_message %}
+                      <h2>{{ sucess_message }}</h2>
+                    {% endif %}
             </div>
-            <div class="col-sm-4">
-                {% for product in products %}
-                    <h3 style="font-family: Montserrat;">{{ product[0] }}</h3>
-                {% endfor %}
             </div>
         </div>
 
@@ -103,19 +128,6 @@
 
 </div>
 
-<script>
-        function checkInput() {
-            var product = document.getElementById("product").value;
-            var submitBtn = document.getElementById("track");
-            if (product.trim() === "") {
-              submitBtn.disabled = true;
-            } else if (product.includes("@")) {
-            submitBtn.disabled = true;
-            } else {
-              submitBtn.disabled = false;
-            }
-        }
-</script>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/js/bootstrap.bundle.min.js" integrity="sha384-HwwvtgBNo3bZJJLYd8oVXjrBZt8cqVSpeBNS5n7C8IVInixGAoxmnlMuBnhbgrkm" crossorigin="anonymous"></script>
 </body>
