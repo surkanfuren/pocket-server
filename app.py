@@ -6,6 +6,7 @@ import requests
 from dotenv import load_dotenv
 import os
 import json
+import pyotp
 
 app = Flask(__name__)
 
@@ -157,8 +158,8 @@ def forgot():
 
     if session.get('logged_in'):
         return redirect(url_for('dashboard'))
-    pinCode = False
-    session['pincode'] =pinCode
+    pin_code = False
+    session['pincode'] = pin_code
     message = None
     if request.method == "POST":
         email = request.form["email"]
@@ -167,16 +168,19 @@ def forgot():
         if user is None:
             message = "There are no users registered with this e-mail, try registering instead!"
         else:
-            pinCode= True
-            username = email.split("@")[0]
+            pin_code = True
             print("Recovering password!")
+
+            secret_key = pyotp.random_base32()
+            totp = pyotp.TOTP(secret_key)
+            verification_code = totp.now()
 
             # Lambda API Call
             endpoint = "https://njlzm7rsm9.execute-api.eu-north-1.amazonaws.com/default/forgotPasswordEmail"
             headers = {"Content-Type": "application/json"}
 
             # Sending mail data to endpoint with POST request
-            payload = {"subject": "Fourthand password recovery", "message_body": f"Dear {username}, we'll save your password soon!", "destination": [email]}
+            payload = {"subject": "Fourthand password recovery", "message_body": f"Your one-time password recovery code: {verification_code}", "destination": [email]}
             payload_json = json.dumps(payload)
             response = requests.post(endpoint, data=payload_json, headers=headers)
 
@@ -190,14 +194,19 @@ def forgot():
                 print("Request failed. Status code:", response.status_code)
                 print("Response:", response.text)
 
-    return render_template('pages/forgot.html', message=message,pinCode=pinCode)
+    return render_template('pages/forgot.html', message=message, pinCode=pin_code)
 @app.route('/verification', methods=['GET', 'POST'])
 def verification():
     if request.method == "POST":
-        code = request.form['code']
-        print(code)
-        if code == '12345':
-            #return redirect("/forgot") şifre sıfırlama sekmesi
+        # code = request.form['code']
+        # is_verified = totp.verify(code)
+
+        """
+        if is_verified:
+            print("Correct code")
+        else:
+            print("Wrong code!")
+        """
 
     return render_template('pages/forgot.html')
 # __________________________________________________ FUNCTIONAL ROUTES __________________________________________________ #
