@@ -235,7 +235,7 @@ celerybeat.pid
 
 # SageMath parsed files
 *.sage.py
-
+client-secret.json
 # Environments
 .env
 .venv

@@ -5,6 +5,16 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Fourthand · Log in</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-4bw+/aepP/YC94hEpVNVgiZdgIC5+VKNBQNGCHeKRQN+PtmoHDEXuppvnDJzQIu9" crossorigin="anonymous">
+    <link rel="stylesheet" type="text/css" href="styles.css">
+    <link rel="stylesheet" type="text/css" href="//fonts.googleapis.com/css?family=Open+Sans" />
+    <link   rel="stylesheet"
+        href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css"
+        integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm"
+        crossorigin="anonymous">
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"
+        integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl"
+        crossorigin="anonymous">
+</script>
     <script src="https://www.google.com/recaptcha/api.js"></script>
     <script>
     function onSubmit(token) {
@@ -33,8 +43,6 @@
 </head>
 
 <body style="background-color: #A0C1B9;">
-
-
 <nav class="navbar navbar-expand-lg fixed-top custom-nav">
 <div class="container">
     <a class="navbar-brand" href="/">Home</a>
@@ -74,8 +82,9 @@
     </div>
 
     <div class="container"><hr></div>
-
         <div class="d-flex justify-content-center">
+            <link rel="stylesheet" type="text/css" href="//fonts.googleapis.com/css?family=Open+Sans" />
+
             <form id="sign-up-form" method="POST" action="/login">
                 <div class="mb-3">
                     <input type="email" placeholder="Email address" class="form-control" name="email">
@@ -93,12 +102,21 @@
                 <div>
                     <a style="color:black;text-decoration:none" class="beautiful-link" href="/forgot">Forgot your password?</a></p>
                 </div>
+                <div class="row">
+  <div class="col-md-3">
+    <a class="btn btn-outline-dark" href="/users/googleauth" role="button" style="text-transform:none; background-color: white;">
+      <img width="20px" style="margin-bottom:3px; margin-right:5px" alt="Google sign-in" src="https://upload.wikimedia.org/wikipedia/commons/thumb/5/53/Google_%22G%22_Logo.svg/512px-Google_%22G%22_Logo.svg.png" />
+      Login with Google
+    </a>
+  </div>
+</div>
+
+
             </form>
         </div>
 
         <div class="d-flex justify-content-center">
             {% if message %}
-                      <p>{{ message }}</p>
                     {% endif %}
         </div>
 

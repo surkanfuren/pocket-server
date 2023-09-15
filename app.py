@@ -1,3 +1,5 @@
+import pathlib
+
 from flask import Flask, render_template, redirect, request, session, url_for, abort
 from flask_mail import Mail
 import sqlite3
@@ -7,10 +9,20 @@ from dotenv import load_dotenv
 import os
 import json
 import pyotp
+from google_auth_oauthlib.flow import Flow
 
 app = Flask(__name__)
 
 load_dotenv()
+
+GOOGLE_CLIENT_ID = os.getenv("GOOGLE_CLIENT_ID")
+client_secrets_file = os.path.join(pathlib.Path(__file__).parent,"client-secret.json")
+flow = Flow.from_client_secrets_file(
+    client_secrets_file=client_secrets_file,
+    scopes=["https://www.googleapis.com/auth/userinfo.profile", "https://www.googleapis.com/auth/userinfo.email",
+            "openid"],
+    redirect_uri="http://127.0.0.1:5000/callback"
+)
 
 app.secret_key = 'BAD_SECRET_KEY'
 SITE_KEY = '6LfiYiEoAAAAAHojsCOY72WzNTGbFjZKIYFdhGPW'
@@ -51,7 +63,6 @@ def login():
     session["email"] = None
     session["phone_number"] = None
     message = None
-
     if request.method == "POST":
         print(request.form)
         secret_response = request.form.get('g-recaptcha-response', False)
