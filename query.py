@@ -15,12 +15,21 @@ email = "furkan@mail.com"
 password_first = "furkan"
 password = hash_password(password_first)
 
-cursor.execute("SELECT * FROM users where user_mail =? AND user_pass =?", (email, password))
+cursor.execute("SELECT * FROM users WHERE user_mail =? AND user_pass =?", (email, password))
 user = cursor.fetchone()
 
 print(user[1].split("@")[0])
+print(user[3])
 
-cursor.execute("SELECT * FROM products")
+cursor.execute("SELECT product_name FROM products WHERE user_id = ?", (11,))
 payload = cursor.fetchall()
 
-print(payload)
+for i in payload:
+    print(i[0])
+
+
+cursor.execute("SELECT * FROM users")
+getit = cursor.fetchall()
+
+for i in getit:
+    print(i)
