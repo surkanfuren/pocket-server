@@ -142,48 +142,34 @@ def dashboard():
     products = cursor.fetchall()
 
     return render_template('pages/dashboard.html', username=username, number=number, products=products)
-
-@app.route('/phone_number')
-def phone_number():
-    if not session.get('logged_in'):
-        return redirect(url_for('login'))
-
-    username = session["username"]
-    number = session["phone_number"]
-
-    return render_template('pages/phone_number.html', username=username, number=number)
-
 @app.route('/profile',methods=['GET','POST'])
 def profile():
     if not session.get('logged_in'):
         return redirect(url_for('login'))
 
     error_message = None
-    sucess_message = None
+    success_message = None
     username = session["username"]
     if request.method == "POST" :
-        print(request.form)
         if "phone_change" in request.form:
-            print("burda1-telfn")
             new_phone =request.form.get("phone_change")
             cursor.execute("UPDATE users SET phone_number =? WHERE user_id =?",(new_phone,session["id"]))
             conn.commit()
             session["phone_number"] = new_phone
-            sucess_message = "Phone changed successfully"
+            success_message = "Phone changed successfully"
         elif 'password_control_one' in request.form:
-            print("burda1-pass")
             control_one = request.form.get("password_control_one")
             control_two = request.form.get("password_control_two")
-            if control_two != control_one:
-                error_message= "The passwords you entered must match!"
-
             if not is_strong_password(control_one):
-                error_message = "Password must be at least 6 chars"
-            hashed_new_pass = hash_password(control_one)
-            cursor.execute("UPDATE users SET user_pass=? WHERE user_id=?",(hashed_new_pass,session["id"]))
-            conn.commit()
-            sucess_message = "Password changed successfully"
-    return render_template('pages/profile.html', username=username, number=session["phone_number"],error_message=error_message,sucess_message=sucess_message)
+                error_message = "Your password must be at least 6 characters"
+            elif control_two != control_one:
+                error_message= "The passwords you entered must match!"
+            else:
+                hashed_new_pass = hash_password(control_one)
+                cursor.execute("UPDATE users SET user_pass=? WHERE user_id=?",(hashed_new_pass,session["id"]))
+                conn.commit()
+                success_message = "Password changed successfully"
+    return render_template('pages/profile.html', username=username, number=session["phone_number"],error_message=error_message,success_message=success_message)
 
 @app.route('/about')
 def about():

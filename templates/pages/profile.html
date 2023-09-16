@@ -6,59 +6,66 @@
     <title>Profile · {{ username }}</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-4bw+/aepP/YC94hEpVNVgiZdgIC5+VKNBQNGCHeKRQN+PtmoHDEXuppvnDJzQIu9" crossorigin="anonymous">
     <link href='https://fonts.googleapis.com/css?family=Montserrat' rel='stylesheet'>
-<style>
-    .full-width-container {
-        padding-left: 0;
-        padding-right: 0;
-        margin-left: 0;
-        margin-right: 0;
-        width: 100%;
-        background-color: #729d98;
-    }
+    <style>
+        .full-width-container {
+            padding-left: 0;
+            padding-right: 0;
+            margin-left: 0;
+            margin-right: 0;
+            width: 100%;
+            background-color: #729d98;
+        }
 
         .full-width-container-2 {
-        padding-left: 0;
-        padding-right: 0;
-        margin-left: 0;
-        margin-right: 0;
-        width: 100%;
-        background-color: beige;
-    }
+            padding-left: 0;
+            padding-right: 0;
+            margin-left: 0;
+            margin-right: 0;
+            width: 100%;
+            background-color: beige;
+        }
 
-    .custom-nav {
-        background-color: beige;
-    }
+        .custom-nav {
+            background-color: beige;
+        }
 
-    .custom-btn {
-        background-color: #729d98;
-        border: none;
-    }
+        .custom-btn {
+            background-color: #729d98;
+            border: none;
+        }
 
-</style>
+        /* Custom styles for form elements */
+        .form-group {
+            margin-bottom: 20px;
+        }
 
+        .form-control {
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+    </style>
 </head>
 <body style="background-color: #729d98;">
 
 <nav class="navbar navbar-expand-lg fixed-top custom-nav">
-  <div class="container">
-      <a class="navbar-brand" href="/dashboard">Dashboard</a>
-    <div class="collapse navbar-collapse" id="navbarText">
-      <ul class="navbar-nav ms-auto mb-2 mb-lg-0">
-        <li class="nav-item">
-          <a class="nav-link" href="/profile">Profile</a>
-        </li>
-        <li class="nav-item">
-          <a class="nav-link" style="color:red;" href="/logout">Log out</a>
-        </li>
-      </ul>
+    <div class="container">
+        <a class="navbar-brand" href="/dashboard">Dashboard</a>
+        <div class="collapse navbar-collapse" id="navbarText">
+            <ul class="navbar-nav ms-auto mb-2 mb-lg-0">
+                <li class="nav-item">
+                    <a class="nav-link" href="/profile">Profile</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" style="color:red;" href="/logout">Log out</a>
+                </li>
+            </ul>
+        </div>
     </div>
-  </div>
 </nav>
 
 <br><br>
 
-<div class="container" style="height: 55px;">
-</div>
+<div class="container" style="height: 55px;"></div>
 
 <div class="full-width-container">
 
@@ -77,57 +84,91 @@
                     <h2 style="font-family: Montserrat;">Change your profile information</h2>
                     <br><br>
                     <div class="d-flex justify-content-center">
-                            <h4 style="font-family: Montserrat;">Current  Phone Number: {{number}}</h4>
-
+                        <h4 style="font-family: Montserrat;">Current Phone Number: {{number}}</h4>
                     </div>
+
                     <h4 style="font-family: Montserrat;">Change Phone</h4>
-                    <form name=phone_editor method="POST" action="/profile">
-                        <div class="input-group mb-2">
-                            <div class="mb-3">
-                    <input type="number" placeholder="New Phone Number" class="form-control" name="phone_change">
-                </div>
-
-                            <div class="d-flex justify-content-center">
-                                <div class="input-group-append">
-                                <button type="submit" class="btn btn-primary" id="change" >Change Number</button>
-                                    <br><br>
-
-                            </div>
-
-                    </div>
-                             <h4 style="font-family: Montserrat;">Change Password</h4>
-
+                    <form name="phone_editor" method="POST" action="/profile">
+                        <div class="form-group">
+                            <input type="number" placeholder="New Phone Number" class="form-control" name="phone_change">
+                        </div>
+                        <div class="d-flex justify-content-center">
+                            <button type="submit" class="btn btn-primary" id="change">Change Number</button>
                         </div>
                     </form>
+
+                    <h4 style="font-family: Montserrat;">Change Password</h4>
                     <form name="password_editor" method="POST" action="/profile">
-    <div class="mb-3">
-        <input type="password" placeholder="New Password" class="form-control" name="password_control_one">
-        <br><br>
-        <input type="password" placeholder="New Password Again" class="form-control" name="password_control_two">
+                        <div class="form-group">
+                            <input type="password" placeholder="New Password" class="form-control" name="password_control_one">
+                        </div>
+                        <div class="form-group">
+                            <input type="password" placeholder="New Password Again" class="form-control" name="password_control_two">
+                        </div>
+                        <div class="d-flex justify-content-center">
+                            <button type="submit" class="btn btn-primary" id="pass_change">Change Password</button>
+                        </div>
+                    </form>
+                    <form name ="del-account" method="POST">
+                         <div>
+                                                        <br><br>
+                                    <button type="submit" class="btn btn-danger" id="deleteAccountBtn">I want to delete my account</button>
+                        </div>
+                                            </form>
+                        <div id="confirmationDialog" style="display: none;">
+        <p>Are you sure you want to delete your account? This option will delete your account forever and it will not be possible to recover in future.</p>
+        <button id="confirmDeleteBtn">Yes, Delete My Account</button>
+        <button id="cancelDeleteBtn">Cancel</button>
     </div>
-    <div class="input-group-append">
-        <button type="submit" class="btn btn-primary" id="pass_change" >Change Password</button>
-    </div>
-</form>
+                        <script>
+    const deleteAccountBtn = document.getElementById("deleteAccountBtn");
+    const confirmationDialog = document.getElementById("confirmationDialog");
+    const confirmDeleteBtn = document.getElementById("confirmDeleteBtn");
+    const cancelDeleteBtn = document.getElementById("cancelDeleteBtn");
+
+    deleteAccountBtn.addEventListener("click", (event) => {
+        event.preventDefault(); // Prevent default form submission behavior
+        confirmationDialog.style.display = "block";
+    });
+
+    confirmDeleteBtn.addEventListener("click", () => {
+
+        fetch("/delete_account", {
+            method: "POST",
+        })
+        .then(response => {
+            if (response.status === 200) {
+                alert("Account deleted successfully");
+            } else {
+                alert("Account deletion failed");
+            }
+        });
+
+        confirmationDialog.style.display = "none";
+    });
+
+    cancelDeleteBtn.addEventListener("click", () => {
+        confirmationDialog.style.display = "none";
+    });
+</script>
+
+
 
                 </div>
-<div class="d-flex justify-content-center">
-            {% if error_message %}
-                      <p>{{ error_message }}</p>
+                <div class="d-flex justify-content-center">
+                    {% if error_message %}
+                        <p>{{ error_message }}</p>
                     {% endif %}
-        </div>
-                    <div class="col-sm-8">
-                {% if sucess_message %}
-                      <h2>{{ sucess_message }}</h2>
+                </div>
+                <div class="col-sm-8">
+                    {% if success_message %}
+                        <h2>{{ success_message }}</h2>
                     {% endif %}
-            </div>
+                </div>
             </div>
         </div>
-
     </div>
-
 </div>
-
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/js/bootstrap.bundle.min.js" integrity="sha384-HwwvtgBNo3bZJJLYd8oVXjrBZt8cqVSpeBNS5n7C8IVInixGAoxmnlMuBnhbgrkm" crossorigin="anonymous"></script>
 </body>
