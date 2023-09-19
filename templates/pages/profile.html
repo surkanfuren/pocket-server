@@ -135,7 +135,15 @@
 
         fetch("/delete_account", {
             method: "POST",
-            location.reload();
+        })
+        .then(response => {
+            if (response.status === 200) {
+                alert("Account deleted successfully");
+                location.reload();
+            } else {
+                alert("Account deletion failed");
+                location.reload();
+            }
         });
 
         confirmationDialog.style.display = "none";

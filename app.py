@@ -126,7 +126,7 @@ def delete_account():
         cursor.execute("DELETE FROM users WHERE user_id=?", (account_to_delete,))
         conn.commit()
         session.clear()
-        return redirect(url_for('login'))
+        return "Account deletion successful", 200
 
     except Exception as e:
         print("HERE")
