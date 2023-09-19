@@ -74,9 +74,11 @@
     </div>
 
     <div class="container"><hr></div>
-        {% if not pinCode %}
+
     <div class="d-flex justify-content-center">
-        <form id="sign-up-form" method="POST" action="/forgot">
+        <!-------------------------------------------------- FORMS HERE -------------------------------------------------->
+        {% if not pinCode %}
+        <form id="forgot_email" method="POST" action="/forgot">
               <div class="mb-3">
                 <input type="email" placeholder="Email address" class="form-control" name="email">
               </div>
@@ -84,11 +86,13 @@
                   <button type="submit" class="g-recaptcha btn btn-primary" data-sitekey="{{site_key}}" data-callback='onSubmit' data-action='submit' name="g-recaptcha-response">Send email</button>
               </div>
         </form>
-    </div>
         {% endif %}
+
         {% if pinCode %}
-    <div class="d-flex justify-content-center">
-        <form id="sign-ups-form" method="POST" action="/verification">
+        <form id="code_verify" method="POST" action="/forgot">
+            {% if wrong_code %}
+            <p>{{ not_verified }}</p>
+            {% endif %}
               <div class="mb-3">
                 <input type="text" placeholder="Write 6 digit code" class="form-control" name="code">
               </div>
@@ -96,26 +100,35 @@
                   <button type="submit" class="g-recaptcha btn btn-primary" data-callback='onSubmit' data-action='submit' id="codeSender" name="codeSender">Submit</button>
               </div>
         </form>
-    </div>
         {% endif %}
 
-
-
-
-
-        <div class="d-flex justify-content-center">
-    {% if message %}
-        <p>{{ message }}</p>
-        <p></p><div><a class="beautiful-link" href="/signup">Sign-Up</a></div></p>
-    {% endif %}
-</div>
-
-
-
-    <div class="container"><hr></div>
-
+        {% if is_verified %}
+        <form id="new-password" method="POST" action="/forgot">
+              <div class="mb-3">
+                <input type="password" placeholder="New password" class="form-control" name="new_password">
+              </div>
+              <div class="mb-3">
+                <input type="password" placeholder="Re-enter new password" class="form-control" name="confirm_password">
+              </div>
+              <div class="d-flex justify-content-center">
+                  <button type="submit" class="btn btn-primary" id="password_changed" name="password_changed">Update Password</button>
+              </div>
+        </form>
+        {% endif %}
+        <!-------------------------------------------------- FORMS END -------------------------------------------------->
     </div>
 
+    <div class="d-flex justify-content-center">
+        {% if message %}
+            <p>{{ message }}</p>
+            <div>
+                <a class="beautiful-link" href="/signup">Sign-Up</a>
+            </div>
+        {% endif %}
+    </div>
+
+    <div class="container"><hr></div>
+    </div>
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/js/bootstrap.bundle.min.js" integrity="sha384-HwwvtgBNo3bZJJLYd8oVXjrBZt8cqVSpeBNS5n7C8IVInixGAoxmnlMuBnhbgrkm" crossorigin="anonymous"></script>
