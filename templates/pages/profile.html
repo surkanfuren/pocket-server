@@ -116,7 +116,7 @@
                         </div>
                                             </form>
                         <div id="confirmationDialog" style="display: none;">
-        <p>Are you sure you want to delete your account? This option will delete your account forever and it will not be possible to recover in future.</p>
+        <p>Are you sure you want to delete your account? This option will delete your account forever, and it will not be possible to recover in the future.</p>
         <button id="confirmDeleteBtn">Yes, Delete My Account</button>
         <button id="cancelDeleteBtn">Cancel</button>
     </div>
@@ -127,7 +127,7 @@
     const cancelDeleteBtn = document.getElementById("cancelDeleteBtn");
 
     deleteAccountBtn.addEventListener("click", (event) => {
-        event.preventDefault(); // Prevent default form submission behavior
+        event.preventDefault();
         confirmationDialog.style.display = "block";
     });
 
@@ -135,13 +135,7 @@
 
         fetch("/delete_account", {
             method: "POST",
-        })
-        .then(response => {
-            if (response.status === 200) {
-                alert("Account deleted successfully");
-            } else {
-                alert("Account deletion failed");
-            }
+            location.reload();
         });
 
         confirmationDialog.style.display = "none";

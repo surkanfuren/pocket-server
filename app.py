@@ -119,6 +119,20 @@ def signup():
 
     return render_template('pages/signup.html', message=message, site_key=SITE_KEY, emptyMessage=empty_message)
 
+@app.route('/delete_account',methods=['POST'])
+def delete_account():
+    account_to_delete = session["id"]
+    try:
+        cursor.execute("DELETE FROM users WHERE user_id=?", (account_to_delete,))
+        conn.commit()
+        session.clear()
+        return redirect(url_for('login'))
+
+    except Exception as e:
+        print("HERE")
+        conn.rollback()
+        print(f"Error: {str(e)}")
+        return "Account deletion failed", 500
 
 @app.route('/dashboard', methods=['GET', 'POST'])
 def dashboard():
@@ -127,7 +141,7 @@ def dashboard():
     else:
         user_id = session["id"]
         email = session["email"]
-        number = session["phone_number"]
+        #number = session["phone_number"]
         username = email.split("@")[0]
         session["username"] = username
 
@@ -141,7 +155,7 @@ def dashboard():
     cursor.execute("SELECT product_name FROM products WHERE user_id = ?", (user_id,))
     products = cursor.fetchall()
 
-    return render_template('pages/dashboard.html', username=username, number=number, products=products)
+    return render_template('pages/dashboard.html', username=username, products=products)
 @app.route('/profile',methods=['GET','POST'])
 def profile():
     if not session.get('logged_in'):
