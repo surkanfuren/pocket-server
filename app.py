@@ -266,7 +266,7 @@ def forgot():
                 print("Verification code is correct.")
             else:
                 wrong_code = True
-                exist=True
+                exist = True
                 not_verified = "Invalid code. Please check again."
                 print(not_verified)
 
