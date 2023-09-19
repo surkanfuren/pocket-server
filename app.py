@@ -208,14 +208,13 @@ def forgot():
     is_verified = False
     not_verified = None
     wrong_code = False
-    session['exist'] = exist
     message = None
     email = None
 
     secret_key = pyotp.random_base32()
     hotp = pyotp.HOTP(secret_key)
 
-    verification_code = session.get('verification_code')
+    verification_code = session.get("verification_code")
     typeof_code = None
 
     if request.method == "POST":
@@ -230,8 +229,8 @@ def forgot():
                 exist = True
                 print("Recovering password!")
                 verification_code = hotp.at(0)
+                session["verification_code"] = verification_code
                 typeof_code = type(verification_code)
-                session['verification_code'] = verification_code
                 print(f"Verification code: {verification_code}\n"
                       f"Type of verification code:{typeof_code}")
 
@@ -256,9 +255,10 @@ def forgot():
 
         elif "codeSender" in request.form:
             input_code = request.form["code"]
-            is_verified = hotp.verify(input_code, 0)
+            is_verified = verify(input_code, verification_code)
             print(f"Verification code: {verification_code}\n"
                   f"Type of verification code:{typeof_code}")
+            print(f"User input: {input_code}")
             print(is_verified)
             print(type(input_code))
 
@@ -297,6 +297,13 @@ def hash_password(password):
     sha256.update(password.encode('utf-8'))
     hashed_password = sha256.hexdigest()
     return hashed_password
+
+
+def verify(input_code, verification_code):
+    is_verified = False
+    if input_code == verification_code:
+        is_verified = True
+    return is_verified
 
 
 @app.route('/logout')
