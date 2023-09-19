@@ -1,5 +1,4 @@
 import pathlib
-
 from flask import Flask, render_template, redirect, request, session, url_for, abort
 from flask_mail import Mail
 import sqlite3
@@ -15,6 +14,7 @@ app = Flask(__name__)
 
 load_dotenv()
 
+"""
 GOOGLE_CLIENT_ID = os.getenv("GOOGLE_CLIENT_ID")
 client_secrets_file = os.path.join(pathlib.Path(__file__).parent,"client-secret.json")
 flow = Flow.from_client_secrets_file(
@@ -23,6 +23,8 @@ flow = Flow.from_client_secrets_file(
             "openid"],
     redirect_uri="http://127.0.0.1:5000/callback"
 )
+"""
+
 
 app.secret_key = 'BAD_SECRET_KEY'
 SITE_KEY = '6LfiYiEoAAAAAHojsCOY72WzNTGbFjZKIYFdhGPW'
@@ -119,7 +121,7 @@ def signup():
 
     return render_template('pages/signup.html', message=message, site_key=SITE_KEY, emptyMessage=empty_message)
 
-@app.route('/delete_account',methods=['POST'])
+@app.route('/delete_account', methods=['POST'])
 def delete_account():
     account_to_delete = session["id"]
     try:
@@ -128,10 +130,10 @@ def delete_account():
         session.clear()
         return "Account deletion successful", 200
 
-    except Exception as e:
+    except Exception as err:
         print("HERE")
         conn.rollback()
-        print(f"Error: {str(e)}")
+        print(f"Error: {str(err)}")
         return "Account deletion failed", 500
 
 @app.route('/dashboard', methods=['GET', 'POST'])
@@ -141,7 +143,7 @@ def dashboard():
     else:
         user_id = session["id"]
         email = session["email"]
-        #number = session["phone_number"]
+        # number = session["phone_number"]
         username = email.split("@")[0]
         session["username"] = username
 
@@ -151,12 +153,11 @@ def dashboard():
         cursor.execute("INSERT INTO products (user_id, product_name) VALUES (?, ?)", (user_id, product))
         conn.commit()
 
-
     cursor.execute("SELECT product_name FROM products WHERE user_id = ?", (user_id,))
     products = cursor.fetchall()
 
     return render_template('pages/dashboard.html', username=username, products=products)
-@app.route('/profile',methods=['GET','POST'])
+@app.route('/profile', methods=['GET', 'POST'])
 def profile():
     if not session.get('logged_in'):
         return redirect(url_for('login'))
@@ -164,10 +165,10 @@ def profile():
     error_message = None
     success_message = None
     username = session["username"]
-    if request.method == "POST" :
+    if request.method == "POST":
         if "phone_change" in request.form:
-            new_phone =request.form.get("phone_change")
-            cursor.execute("UPDATE users SET phone_number =? WHERE user_id =?",(new_phone,session["id"]))
+            new_phone = request.form.get("phone_change")
+            cursor.execute("UPDATE users SET phone_number =? WHERE user_id =?", (new_phone, session["id"]))
             conn.commit()
             session["phone_number"] = new_phone
             success_message = "Phone changed successfully"
@@ -177,13 +178,13 @@ def profile():
             if not is_strong_password(control_one):
                 error_message = "Your password must be at least 6 characters"
             elif control_two != control_one:
-                error_message= "The passwords you entered must match!"
+                error_message = "The passwords you entered must match!"
             else:
                 hashed_new_pass = hash_password(control_one)
-                cursor.execute("UPDATE users SET user_pass=? WHERE user_id=?",(hashed_new_pass,session["id"]))
+                cursor.execute("UPDATE users SET user_pass=? WHERE user_id=?", (hashed_new_pass, session["id"]))
                 conn.commit()
                 success_message = "Password changed successfully"
-    return render_template('pages/profile.html', username=username, number=session["phone_number"],error_message=error_message,success_message=success_message)
+    return render_template('pages/profile.html', username=username, number=session["phone_number"], error_message=error_message, success_message=success_message)
 
 @app.route('/about')
 def about():
@@ -197,68 +198,99 @@ def pricing():
 def faq():
     return render_template('pages/faq.html')
 
+
 @app.route('/forgot', methods=['GET', 'POST'])
 def forgot():
-
     if session.get('logged_in'):
         return redirect(url_for('dashboard'))
-    pin_code = False
-    session['pincode'] = pin_code
+
+    exist = False
+    is_verified = False
+    not_verified = None
+    wrong_code = False
+    session['exist'] = exist
     message = None
+    email = None
+
+    secret_key = pyotp.random_base32()
+    hotp = pyotp.HOTP(secret_key)
+
+    verification_code = session.get('verification_code')
+    typeof_code = None
+
     if request.method == "POST":
-        email = request.form["email"]
-        cursor.execute("SELECT * FROM users WHERE user_mail =?", (email,))
-        user = cursor.fetchone()
-        if user is None:
-            message = "There are no users registered with this e-mail, try registering instead!"
-        else:
-            pin_code = True
-            print("Recovering password!")
+        if "g-recaptcha-response" in request.form:
+            email = request.form["email"]
+            cursor.execute("SELECT * FROM users WHERE user_mail = ?", (email,))
+            user = cursor.fetchone()
 
-            secret_key = pyotp.random_base32()
-            totp = pyotp.TOTP(secret_key)
-            verification_code = totp.now()
-
-            # Lambda API Call
-            endpoint = "https://njlzm7rsm9.execute-api.eu-north-1.amazonaws.com/default/forgotPasswordEmail"
-            headers = {"Content-Type": "application/json"}
-
-            # Sending mail data to endpoint with POST request
-            payload = {"subject": "Fourthand password recovery", "message_body": f"Your one-time password recovery code: {verification_code}", "destination": [email]}
-            payload_json = json.dumps(payload)
-            response = requests.post(endpoint, data=payload_json, headers=headers)
-
-            # Receiving response status
-            if response.status_code == 200:
-                print("Request successful!")
-                print("----------------------------------------------------------------------------------------------------")
-                print("Response:", response.text)
-                print("----------------------------------------------------------------------------------------------------")
+            if user is None:
+                message = "There are no users registered with this e-mail, try registering instead!"
             else:
-                print("Request failed. Status code:", response.status_code)
-                print("Response:", response.text)
+                exist = True
+                print("Recovering password!")
+                verification_code = hotp.at(0)
+                typeof_code = type(verification_code)
+                session['verification_code'] = verification_code
+                print(f"Verification code: {verification_code}\n"
+                      f"Type of verification code:{typeof_code}")
 
-    return render_template('pages/forgot.html', message=message, pinCode=pin_code)
-@app.route('/verification', methods=['GET', 'POST'])
-def verification():
-    if request.method == "POST":
-        # code = request.form['code']
-        # is_verified = totp.verify(code)
+                # Lambda API Call
+                endpoint = "https://njlzm7rsm9.execute-api.eu-north-1.amazonaws.com/default/forgotPasswordEmail"
+                headers = {"Content-Type": "application/json"}
 
-        """
-        if is_verified:
-            print("Correct code")
-        else:
-            print("Wrong code!")
-        """
+                # Sending mail to Lambda endpoint with POST request
+                payload = {"subject": "Fourthand password recovery", "message_body": f"Your one-time password recovery code: {verification_code}", "destination": [email]}
+                payload_json = json.dumps(payload)
+                response = requests.post(endpoint, data=payload_json, headers=headers)
 
-    return render_template('pages/forgot.html')
+                # Receiving status response
+                if response.status_code == 200:
+                    print("Request successful!")
+                    print("----------------------------------------------------------------------------------------------------")
+                    print("Response:", response.text)
+                    print("----------------------------------------------------------------------------------------------------")
+                else:
+                    print("Request failed. Status code:", response.status_code)
+                    print("Response:", response.text)
+
+        elif "codeSender" in request.form:
+            input_code = request.form["code"]
+            is_verified = hotp.verify(input_code, 0)
+            print(f"Verification code: {verification_code}\n"
+                  f"Type of verification code:{typeof_code}")
+            print(is_verified)
+            print(type(input_code))
+
+            if is_verified:
+                print("Verification code is correct.")
+            else:
+                wrong_code = True
+                not_verified = "Invalid code. Please check again."
+                print(not_verified)
+
+        elif "password_changed" in request.form:
+            new_password = request.form["new_password"]
+            confirm_password = request.form["confirm_password"]
+
+            if new_password != confirm_password:
+                print("Passwords do not match.")
+            else:
+                cursor.execute("UPDATE users SET user_pass = ? WHERE user_mail = ?", (new_password, email))
+                conn.commit()
+                return redirect(url_for('login'))
+
+    return render_template('pages/forgot.html', message=message, pinCode=exist, is_verified=is_verified, wrong_code=wrong_code, not_verified=not_verified)
+
+
 # __________________________________________________ FUNCTIONAL ROUTES __________________________________________________ #
+
 
 def is_email_used(email):
     cursor.execute("SELECT user_id FROM users WHERE user_mail=?", (email,))
     already_registered = cursor.fetchone()
     return already_registered is not None
+
 
 def hash_password(password):
     sha256 = hashlib.sha256()
@@ -266,19 +298,18 @@ def hash_password(password):
     hashed_password = sha256.hexdigest()
     return hashed_password
 
+
 @app.route('/logout')
 def logout():
     if not session.get('logged_in'):
         abort(401)
     else:
-        #session["logged_in"] = False
+        # session["logged_in"] = False
         session.clear()
         return redirect(url_for('login'))
 def is_strong_password(password):
     if len(password) > 5:
         return True
-
-
 
 
 if __name__ == '__main__':
