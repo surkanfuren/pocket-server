@@ -77,7 +77,7 @@
 
     <div class="d-flex justify-content-center">
         <!-------------------------------------------------- FORMS HERE -------------------------------------------------->
-        {% if not pinCode %}
+        {% if pinCode==False and extra_security==False %}
         <form id="forgot_email" method="POST" action="/forgot">
               <div class="mb-3">
                 <input type="email" placeholder="Email address" class="form-control" name="email">
@@ -116,6 +116,11 @@
         </form>
         {% endif %}
         <!-------------------------------------------------- FORMS END -------------------------------------------------->
+    </div>
+        <div class="d-flex justify-content-center">
+        {% if success_message %}
+            <p>{{ success_message }}</p>
+        {% endif %}
     </div>
 
     <div class="d-flex justify-content-center">

@@ -9,7 +9,6 @@ import os
 import json
 import pyotp
 from google_auth_oauthlib.flow import Flow
-
 app = Flask(__name__)
 
 load_dotenv()
@@ -209,7 +208,9 @@ def forgot():
     not_verified = None
     wrong_code = False
     message = None
-    email = None
+    email = session["email"]
+    extra_security = False
+    success_message = session.get("success_message")
 
     secret_key = pyotp.random_base32()
     hotp = pyotp.HOTP(secret_key)
@@ -226,6 +227,7 @@ def forgot():
             if user is None:
                 message = "There are no users registered with this e-mail, try registering instead!"
             else:
+                session["email"] =email
                 exist = True
                 print("Recovering password!")
                 verification_code = hotp.at(0)
@@ -264,6 +266,8 @@ def forgot():
 
             if is_verified:
                 print("Verification code is correct.")
+                exist = False
+                extra_security = True
             else:
                 wrong_code = True
                 exist = True
@@ -273,15 +277,18 @@ def forgot():
         elif "password_changed" in request.form:
             new_password = request.form["new_password"]
             confirm_password = request.form["confirm_password"]
+            hashed_new_password = hash_password(new_password)
 
             if new_password != confirm_password:
                 print("Passwords do not match.")
             else:
-                cursor.execute("UPDATE users SET user_pass = ? WHERE user_mail = ?", (new_password, email))
+                cursor.execute("UPDATE users SET user_pass = ? WHERE user_mail = ?", (hashed_new_password, email))
                 conn.commit()
+                success_message = "Password changed successfully."
+                session["success_message"] = success_message
                 return redirect(url_for('login'))
 
-    return render_template('pages/forgot.html', message=message, pinCode=exist, is_verified=is_verified, wrong_code=wrong_code, not_verified=not_verified)
+    return render_template('pages/forgot.html', message=message, pinCode=exist, is_verified=is_verified, wrong_code=wrong_code, not_verified=not_verified,extra_security=extra_security,success_message=success_message)
 
 
 # __________________________________________________ FUNCTIONAL ROUTES __________________________________________________ #
