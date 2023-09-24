@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="google-signin-client_id" content="376698405074-dotvuihrshm2qru6f2n6ha8fsdpk9hmm.apps.googleusercontent.com">
     <title>Fourthand · Log in</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-4bw+/aepP/YC94hEpVNVgiZdgIC5+VKNBQNGCHeKRQN+PtmoHDEXuppvnDJzQIu9" crossorigin="anonymous">
     <link rel="stylesheet" type="text/css" href="styles.css">
@@ -16,6 +17,7 @@
         crossorigin="anonymous">
 </script>
     <script src="https://www.google.com/recaptcha/api.js"></script>
+    <script src="https://apis.google.com/js/platform.js" async defer></script>
     <script>
     function onSubmit(token) {
      document.getElementById("sign-up-form").submit();
@@ -36,13 +38,17 @@
         background-color: beige;
     }
 
-
+    hr.new4 {
+    border: 1px solid black;
+    }
 
 </style>
 
 </head>
 
 <body style="background-color: #A0C1B9;">
+<script src="https://apis.google.com/js/platform.js" async defer></script>
+<script src="https://accounts.google.com/gsi/client" async></script>
 <nav class="navbar navbar-expand-lg fixed-top custom-nav">
 <div class="container">
     <a class="navbar-brand" href="/">Home</a>
@@ -81,7 +87,7 @@
         <h1 class="display-5">Log in</h1>
     </div>
 
-    <div class="container"><hr></div>
+    <div class="container"><hr class="new4"></div>
         <div class="d-flex justify-content-center">
             <link rel="stylesheet" type="text/css" href="//fonts.googleapis.com/css?family=Open+Sans" />
 
@@ -92,40 +98,69 @@
                 <div class="mb-3" style="margin-bottom: 10px;">
                     <input type="password" placeholder="Password" class="form-control" name="password">
                 </div>
-                <div class="d-flex justify-content-center">
+                <div class="d-flex justify-content-center" style="margin-bottom: 10px;">
                     <button type="submit" class="g-recaptcha btn btn-primary" data-sitekey="{{site_key}}" data-callback='onSubmit' data-action='submit' name="g-recaptcha-response">Log In</button>
                 </div>
-                <div>
-                    <br>
-                    <a style="color:black;text-decoration:none" class=beautiful-link" href="/signup">Sign up here</a></p>
+                <div class="d-flex justify-content-center">
+                    <a style="color:black;text-decoration:none" class=beautiful-link" href="/signup">Sign up</a></p>
                 </div>
-                <div>
+                <div class="d-flex justify-content-center">
                     <a style="color:black;text-decoration:none" class="beautiful-link" href="/forgot">Forgot your password?</a></p>
                 </div>
-                <div class="row">
+                <!-- <div class="row">
   <div class="col-md-3">
     <a class="btn btn-outline-dark" href="/users/googleauth" role="button" style="text-transform:none; background-color: white;">
       <img width="20px" style="margin-bottom:3px; margin-right:5px" alt="Google sign-in" src="https://upload.wikimedia.org/wikipedia/commons/thumb/5/53/Google_%22G%22_Logo.svg/512px-Google_%22G%22_Logo.svg.png" />
       Login with Google
     </a>
   </div>
-</div>
-
-
+</div> -->
             </form>
         </div>
+        <div class="container"><hr class="new4"></div>
 
         <div class="d-flex justify-content-center">
             {% if message %}
-                    {% endif %}
+            <p style="color: #8B0000;">{{ message }}</p>
+            {% endif %}
         </div>
 
-    <div class="container"><hr></div>
+                <div class="d-flex justify-content-center">
+                    <h5>Or</h5>
+                </div>
+                <div class="d-flex justify-content-center">
+                    <div id="g_id_onload"
+     data-client_id="376698405074-dotvuihrshm2qru6f2n6ha8fsdpk9hmm.apps.googleusercontent.com"
+     data-context="signin"
+     data-ux_mode="redirect"
+     data-login_uri="http://127.0.0.1:5000/callback"
+     data-auto_prompt="false">
+</div>
 
+<div class="g-signin2"
+     data-type="standard"
+     data-shape="rectangular"
+     data-theme="outline"
+     data-text="continue_with"
+     data-size="large"
+     data-locale="en-US"
+     data-logo_alignment="left">
+</div>
+                </div>
+        <div>
+            <hr>
+        </div>
     </div>
 
 </div>
-
+<script>
+  // Initialize the Google Sign-In API
+  gapi.load('auth2', function() {
+    gapi.auth2.init({
+      client_id: '376698405074-dotvuihrshm2qru6f2n6ha8fsdpk9hmm.apps.googleusercontent.com'
+    });
+  });
+</script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/js/bootstrap.bundle.min.js" integrity="sha384-HwwvtgBNo3bZJJLYd8oVXjrBZt8cqVSpeBNS5n7C8IVInixGAoxmnlMuBnhbgrkm" crossorigin="anonymous"></script>
 </body>
 </html>

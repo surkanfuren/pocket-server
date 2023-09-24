@@ -1,41 +1,51 @@
-import pathlib
 from flask import Flask, render_template, redirect, request, session, url_for, abort
-from flask_mail import Mail
-import sqlite3
-import hashlib
-import requests
+from flask_session import Session
 from dotenv import load_dotenv
-import os
-import json
+from datetime import timedelta
+import requests
+import hashlib
+# import sqlite3
+import pymysql
 import pyotp
-from google_auth_oauthlib.flow import Flow
-app = Flask(__name__)
+import redis
+import json
+import os
 
+
+app = Flask(__name__)
 load_dotenv()
 
+
+# App Configurations
+app.config['SECRET_KEY'] = os.environ.get('APP_SECRET_KEY')
+app.config['SESSION_TYPE'] = 'redis'
+app.config['SESSION_PERMANENT'] = True
+app.config['SESSION_USE_SIGNER'] = True
+app.config['SESSION_KEY_PREFIX'] = 'fourthand-server-session'
+# app.config['SESSION_REDIS'] = redis.from_url(os.environ['REDIS_URL'])  # Remote Redis (Heroku)
+app.config['SESSION_REDIS'] = redis.StrictRedis(host='localhost', port=6379, db=0)  # Local Redis
+app.config['PERMANENT_SESSION_LIFETIME'] = timedelta(days=30)
+app.config['SESSION_REFRESH_EACH_REQUEST'] = True
+Session(app)
+
+
+SITE_KEY = os.environ.get('SITE_KEY')
+VERIFY_URL = os.environ.get('VERIFY_URL')
+
+
+# RDS MySQL Credentials
+endpoint = os.environ.get('DB_ENDPOINT')
+username = os.environ.get('DB_USERNAME')
+password = os.environ.get('DB_PASSWORD')
+database = os.environ.get('DB_NAME')
+
+
+# Database Connection
+conn = pymysql.connect(host=endpoint, user=username, password=password, port=3306, database=database)
+cursor = conn.cursor()
+
+
 """
-GOOGLE_CLIENT_ID = os.getenv("GOOGLE_CLIENT_ID")
-client_secrets_file = os.path.join(pathlib.Path(__file__).parent,"client-secret.json")
-flow = Flow.from_client_secrets_file(
-    client_secrets_file=client_secrets_file,
-    scopes=["https://www.googleapis.com/auth/userinfo.profile", "https://www.googleapis.com/auth/userinfo.email",
-            "openid"],
-    redirect_uri="http://127.0.0.1:5000/callback"
-)
-"""
-
-
-app.secret_key = 'BAD_SECRET_KEY'
-SITE_KEY = '6LfiYiEoAAAAAHojsCOY72WzNTGbFjZKIYFdhGPW'
-VERIFY_URL = 'https://www.google.com/recaptcha/api/siteverify'
-app.config['MAIL_SERVER'] = 'smtp.elasticemail.com'
-app.config['MAIL_PORT'] = 2525
-app.config['MAIL_USERNAME'] = 'fourthandel@smtp.com'
-app.config['MAIL_PASSWORD'] = os.getenv("MAIL_PASS")
-app.config['MAIL_USE_TLS'] = False
-app.config['MAIL_USE_SSL'] = True
-mail = Mail(app)
-
 try:
     conn = sqlite3.connect('database.db', check_same_thread=False)
     cursor = conn.cursor()
@@ -44,8 +54,11 @@ except sqlite3.Error as e:
     print(f"Connection error:{e}")
     conn = sqlite3.connect('database.db', check_same_thread=False)
     cursor = conn.cursor()
+"""
+
 
 # __________________________________________________ PAGE ROUTES __________________________________________________ #
+
 
 @app.route('/')
 def index():
@@ -64,17 +77,19 @@ def login():
     session["email"] = None
     session["phone_number"] = None
     message = None
+
     if request.method == "POST":
         print(request.form)
         secret_response = request.form.get('g-recaptcha-response', False)
         verify_response = requests.post(url=f'{VERIFY_URL}?secret={os.getenv("SECRET_KEY")}&response={secret_response}').json()
+
         if not verify_response['success']:
             abort(401)
 
         email = request.form["email"]
         password_first = request.form["password"]
         password = hash_password(password_first)
-        cursor.execute("SELECT * FROM users WHERE user_mail =? AND user_pass =?", (email, password))
+        cursor.execute("SELECT * FROM users WHERE user_mail = %s AND user_pass = %s", (email, password))
         user = cursor.fetchone()
 
         if user is None:
@@ -90,6 +105,7 @@ def login():
             return redirect(url_for('dashboard'))
 
     return render_template('pages/login.html', message=message, site_key=SITE_KEY)
+
 
 @app.route('/signup', methods=['GET', 'POST'])
 def signup():
@@ -114,17 +130,18 @@ def signup():
             empty_message = "Your e-mail can not be empty!"
         else:
             session["mail_in_use"] = False
-            cursor.execute("INSERT INTO users(user_mail,user_pass) VALUES(?,?)", (email, password))
+            cursor.execute("INSERT INTO users(user_mail,user_pass) VALUES(%s, %s)", (email, password))
             conn.commit()
             return redirect("/login")
 
     return render_template('pages/signup.html', message=message, site_key=SITE_KEY, emptyMessage=empty_message)
 
+
 @app.route('/delete_account', methods=['POST'])
 def delete_account():
     account_to_delete = session["id"]
     try:
-        cursor.execute("DELETE FROM users WHERE user_id=?", (account_to_delete,))
+        cursor.execute("DELETE FROM users WHERE user_id=%s", (account_to_delete,))
         conn.commit()
         session.clear()
         return "Account deletion successful", 200
@@ -134,6 +151,7 @@ def delete_account():
         conn.rollback()
         print(f"Error: {str(err)}")
         return "Account deletion failed", 500
+
 
 @app.route('/dashboard', methods=['GET', 'POST'])
 def dashboard():
@@ -149,13 +167,15 @@ def dashboard():
     # Product search
     if request.method == "POST":
         product = request.form['product']
-        cursor.execute("INSERT INTO products (user_id, product_name) VALUES (?, ?)", (user_id, product))
+        cursor.execute("INSERT INTO products (user_id, product_name) VALUES (%s, %s)", (user_id, product))
         conn.commit()
 
-    cursor.execute("SELECT product_name FROM products WHERE user_id = ?", (user_id,))
+    cursor.execute("SELECT product_name FROM products WHERE user_id = %s", (user_id,))
     products = cursor.fetchall()
 
     return render_template('pages/dashboard.html', username=username, products=products)
+
+
 @app.route('/profile', methods=['GET', 'POST'])
 def profile():
     if not session.get('logged_in'):
@@ -167,7 +187,7 @@ def profile():
     if request.method == "POST":
         if "phone_change" in request.form:
             new_phone = request.form.get("phone_change")
-            cursor.execute("UPDATE users SET phone_number =? WHERE user_id =?", (new_phone, session["id"]))
+            cursor.execute("UPDATE users SET phone_number =%s WHERE user_id =%s", (new_phone, session["id"]))
             conn.commit()
             session["phone_number"] = new_phone
             success_message = "Phone changed successfully"
@@ -180,18 +200,22 @@ def profile():
                 error_message = "The passwords you entered must match!"
             else:
                 hashed_new_pass = hash_password(control_one)
-                cursor.execute("UPDATE users SET user_pass=? WHERE user_id=?", (hashed_new_pass, session["id"]))
+                cursor.execute("UPDATE users SET user_pass=%s WHERE user_id=%s", (hashed_new_pass, session["id"]))
                 conn.commit()
                 success_message = "Password changed successfully"
-    return render_template('pages/profile.html', username=username, number=session["phone_number"], error_message=error_message, success_message=success_message)
+    return render_template('pages/profile.html', username=username, number=session["phone_number"],
+                           error_message=error_message, success_message=success_message)
+
 
 @app.route('/about')
 def about():
     return render_template('pages/about.html')
 
+
 @app.route('/pricing')
 def pricing():
     return render_template('pages/pricing.html')
+
 
 @app.route('/faq')
 def faq():
@@ -221,13 +245,13 @@ def forgot():
     if request.method == "POST":
         if "g-recaptcha-response" in request.form:
             email = request.form["email"]
-            cursor.execute("SELECT * FROM users WHERE user_mail = ?", (email,))
+            cursor.execute("SELECT * FROM users WHERE user_mail = %s", (email,))
             user = cursor.fetchone()
 
             if user is None:
                 message = "There are no users registered with this e-mail, try registering instead!"
             else:
-                session["email"] =email
+                session["email"] = email
                 exist = True
                 print("Recovering password!")
                 verification_code = hotp.at(0)
@@ -237,13 +261,18 @@ def forgot():
                       f"Type of verification code:{typeof_code}")
 
                 # Lambda API Call
-                endpoint = "https://njlzm7rsm9.execute-api.eu-north-1.amazonaws.com/default/forgotPasswordEmail"
+                func_endpoint = "https://njlzm7rsm9.execute-api.eu-north-1.amazonaws.com/default/forgotPasswordEmail"
                 headers = {"Content-Type": "application/json"}
 
                 # Sending mail to Lambda endpoint with POST request
-                payload = {"subject": "Fourthand password recovery", "message_body": f"Your one-time password recovery code: {verification_code}", "destination": [email]}
+                payload = {
+                    "subject": "Fourthand password recovery",
+                    "message_body": f"Your one-time password recovery code: {verification_code}",
+                    "destination": [email]
+                    }
+
                 payload_json = json.dumps(payload)
-                response = requests.post(endpoint, data=payload_json, headers=headers)
+                response = requests.post(func_endpoint, data=payload_json, headers=headers)
 
                 # Receiving status response
                 if response.status_code == 200:
@@ -282,27 +311,28 @@ def forgot():
             if new_password != confirm_password:
                 print("Passwords do not match.")
             else:
-                cursor.execute("UPDATE users SET user_pass = ? WHERE user_mail = ?", (hashed_new_password, email))
+                cursor.execute("UPDATE users SET user_pass = %s WHERE user_mail = %s", (hashed_new_password, email))
                 conn.commit()
                 success_message = "Password changed successfully."
                 session["success_message"] = success_message
                 return redirect(url_for('login'))
 
-    return render_template('pages/forgot.html', message=message, pinCode=exist, is_verified=is_verified, wrong_code=wrong_code, not_verified=not_verified,extra_security=extra_security,success_message=success_message)
+    return render_template('pages/forgot.html', message=message, pinCode=exist, is_verified=is_verified, wrong_code=wrong_code,
+                           not_verified=not_verified, extra_security=extra_security, success_message=success_message)
 
 
 # __________________________________________________ FUNCTIONAL ROUTES __________________________________________________ #
 
 
 def is_email_used(email):
-    cursor.execute("SELECT user_id FROM users WHERE user_mail=?", (email,))
+    cursor.execute("SELECT user_id FROM users WHERE user_mail=%s", (email,))
     already_registered = cursor.fetchone()
     return already_registered is not None
 
 
-def hash_password(password):
+def hash_password(passw):
     sha256 = hashlib.sha256()
-    sha256.update(password.encode('utf-8'))
+    sha256.update(passw.encode('utf-8'))
     hashed_password = sha256.hexdigest()
     return hashed_password
 
@@ -322,8 +352,10 @@ def logout():
         # session["logged_in"] = False
         session.clear()
         return redirect(url_for('login'))
-def is_strong_password(password):
-    if len(password) > 5:
+
+
+def is_strong_password(passw):
+    if len(passw) > 5:
         return True
 
 
