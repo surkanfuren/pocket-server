@@ -1,5 +1,18 @@
 # Starter Docs 📓
 
+## Using redis for session storage
+```
+pip install redis
+```
+
+start local redis server:
+
+```
+redis-server
+```
+
+For Heroku deploy: [Check out the documentation](https://devcenter.heroku.com/articles/heroku-redis)
+
 ## SQLite
 [Download here](https://download.sqlitebrowser.org/DB.Browser.for.SQLite-3.12.2-win64.msi)
 
