@@ -29,7 +29,7 @@ app.config['SESSION_REFRESH_EACH_REQUEST'] = True
 Session(app)
 
 
-SITE_KEY = os.environ.get('SITE_KEY+')
+SITE_KEY = os.environ.get('SITE_KEY')
 VERIFY_URL = os.environ.get('VERIFY_URL')
 
 
@@ -67,14 +67,17 @@ def index():
     return render_template('pages/index.html')
 @app.route('/tasks',methods=['GET','POST'])
 def tasks():
-    if session.get('logged_in'):
-        return redirect(url_for('dashboard'))
 
+    if not session.get('logged_in'):
+        return redirect(url_for('login'))
     if request.method == "POST":
         new_task = request.form['new_task']
         cursor.execute("INSERT INTO tasks (task_description,task_writer) VALUES (?, ?)", (new_task, session["id"]))
         conn.commit()
-    return render_template('pages/tasks.html')
+    cursor.execute("SELECT task_description FROM tasks")
+    current_tasks = cursor.fetchall()
+
+    return render_template('pages/tasks.html',current_tasks=current_tasks)
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():

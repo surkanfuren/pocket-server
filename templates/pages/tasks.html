@@ -67,11 +67,11 @@
             <div class="col-sm-4">
                     <h2 style="font-family: Montserrat;">Add New Task</h2>
 
-                    <form method="POST" action="/dashboard">
+                    <form method="POST" action="/tasks">
                         <div class="input-group mb-2">
-                            <input type="text" placeholder="Implement new CSS styles" class="form-control" id="new_task" name="new_task" onkeyup="checkInput()">
+                            <input type="text" placeholder="Implement new CSS styles" class="form-control" id="new_task" name="new_task">
                             <div class="input-group-append">
-                                <button type="submit" class="btn btn-dark" id="track" disabled>Add Task</button>
+                                <button type="submit" class="btn btn-dark" id="track">Add Task</button>
                             </div>
                         </div>
                     </form>
@@ -81,17 +81,17 @@
                 <h1 style="font-family: Montserrat;">Tracked products(NEW);</h1>
 
                 <hr>
-                {% for product in products %}
-                    <h4 style="font-family: Montserrat;">Number - {{ product[0] }}</h4>
+                {% for task in current_tasks %}
+                     <h4 style="font-family: Montserrat;">{{ loop.index }} - {{ task[0] }}</h4>
                 <button type="button" class="btn btn-primary btn-sm">✅</button>
-                <button type="button" class="btn btn-primary btn-sm delete-product-btn data-task-id="{{product[0]}}>🗑️ </button>
+                <button type="button" class="btn btn-primary btn-sm delete-product-btn">🗑️ </button>
                 {% endfor %}
             </div>
             <div class="col-sm-4">
                 <h1 style="font-family: Montserrat;">Tracked products;</h1>
                 <hr>
-                {% for product in products %}
-                    <h4 style="font-family: Montserrat;">{{ product[0] }}</h4>
+                {% for task in current_tasks %}
+                    <h4 style="font-family: Montserrat;">{{ task[0] }}</h4>
                 {% endfor %}
             </div>
         </div>
