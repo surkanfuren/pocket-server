@@ -4,7 +4,7 @@ from dotenv import load_dotenv
 from datetime import timedelta
 import requests
 import hashlib
-# import sqlite3
+import sqlite3
 import pymysql
 import pyotp
 import redis
@@ -29,7 +29,7 @@ app.config['SESSION_REFRESH_EACH_REQUEST'] = True
 Session(app)
 
 
-SITE_KEY = os.environ.get('SITE_KEY')
+SITE_KEY = os.environ.get('SITE_KEY+')
 VERIFY_URL = os.environ.get('VERIFY_URL')
 
 
@@ -41,11 +41,11 @@ database = os.environ.get('DB_NAME')
 
 
 # Database Connection
-conn = pymysql.connect(host=endpoint, user=username, password=password, port=3306, database=database)
-cursor = conn.cursor()
+#conn = pymysql.connect(host=endpoint, user=username, password=password, port=3306, database=database)
+#cursor = conn.cursor()
 
 
-"""
+
 try:
     conn = sqlite3.connect('database.db', check_same_thread=False)
     cursor = conn.cursor()
@@ -54,7 +54,7 @@ except sqlite3.Error as e:
     print(f"Connection error:{e}")
     conn = sqlite3.connect('database.db', check_same_thread=False)
     cursor = conn.cursor()
-"""
+
 
 
 # __________________________________________________ PAGE ROUTES __________________________________________________ #
@@ -65,7 +65,16 @@ def index():
     if session.get('logged_in'):
         return redirect(url_for('dashboard'))
     return render_template('pages/index.html')
+@app.route('/tasks',methods=['GET','POST'])
+def tasks():
+    if session.get('logged_in'):
+        return redirect(url_for('dashboard'))
 
+    if request.method == "POST":
+        new_task = request.form['new_task']
+        cursor.execute("INSERT INTO tasks (task_description,task_writer) VALUES (?, ?)", (new_task, session["id"]))
+        conn.commit()
+    return render_template('pages/tasks.html')
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
@@ -89,7 +98,7 @@ def login():
         email = request.form["email"]
         password_first = request.form["password"]
         password = hash_password(password_first)
-        cursor.execute("SELECT * FROM users WHERE user_mail = %s AND user_pass = %s", (email, password))
+        cursor.execute("SELECT * FROM users WHERE user_mail = ? AND user_pass = ?", (email, password))
         user = cursor.fetchone()
 
         if user is None:
@@ -130,7 +139,7 @@ def signup():
             empty_message = "Your e-mail can not be empty!"
         else:
             session["mail_in_use"] = False
-            cursor.execute("INSERT INTO users(user_mail,user_pass) VALUES(%s, %s)", (email, password))
+            cursor.execute("INSERT INTO users(user_mail,user_pass) VALUES(?, ?)", (email, password))
             conn.commit()
             return redirect("/login")
 
@@ -141,7 +150,7 @@ def signup():
 def delete_account():
     account_to_delete = session["id"]
     try:
-        cursor.execute("DELETE FROM users WHERE user_id=%s", (account_to_delete,))
+        cursor.execute("DELETE FROM users WHERE user_id=?", (account_to_delete,))
         conn.commit()
         session.clear()
         return "Account deletion successful", 200
@@ -167,10 +176,10 @@ def dashboard():
     # Product search
     if request.method == "POST":
         product = request.form['product']
-        cursor.execute("INSERT INTO products (user_id, product_name) VALUES (%s, %s)", (user_id, product))
+        cursor.execute("INSERT INTO products (user_id, product_name) VALUES (?, ?)", (user_id, product))
         conn.commit()
 
-    cursor.execute("SELECT product_name FROM products WHERE user_id = %s", (user_id,))
+    cursor.execute("SELECT product_name FROM products WHERE user_id = ?", (user_id,))
     products = cursor.fetchall()
 
     return render_template('pages/dashboard.html', username=username, products=products)
@@ -187,7 +196,7 @@ def profile():
     if request.method == "POST":
         if "phone_change" in request.form:
             new_phone = request.form.get("phone_change")
-            cursor.execute("UPDATE users SET phone_number =%s WHERE user_id =%s", (new_phone, session["id"]))
+            cursor.execute("UPDATE users SET phone_number =? WHERE user_id =?", (new_phone, session["id"]))
             conn.commit()
             session["phone_number"] = new_phone
             success_message = "Phone changed successfully"
@@ -200,7 +209,7 @@ def profile():
                 error_message = "The passwords you entered must match!"
             else:
                 hashed_new_pass = hash_password(control_one)
-                cursor.execute("UPDATE users SET user_pass=%s WHERE user_id=%s", (hashed_new_pass, session["id"]))
+                cursor.execute("UPDATE users SET user_pass=? WHERE user_id=?", (hashed_new_pass, session["id"]))
                 conn.commit()
                 success_message = "Password changed successfully"
     return render_template('pages/profile.html', username=username, number=session["phone_number"],
@@ -245,7 +254,7 @@ def forgot():
     if request.method == "POST":
         if "g-recaptcha-response" in request.form:
             email = request.form["email"]
-            cursor.execute("SELECT * FROM users WHERE user_mail = %s", (email,))
+            cursor.execute("SELECT * FROM users WHERE user_mail = ?", (email,))
             user = cursor.fetchone()
 
             if user is None:
@@ -311,7 +320,7 @@ def forgot():
             if new_password != confirm_password:
                 print("Passwords do not match.")
             else:
-                cursor.execute("UPDATE users SET user_pass = %s WHERE user_mail = %s", (hashed_new_password, email))
+                cursor.execute("UPDATE users SET user_pass = ? WHERE user_mail = ?", (hashed_new_password, email))
                 conn.commit()
                 success_message = "Password changed successfully."
                 session["success_message"] = success_message
@@ -325,7 +334,7 @@ def forgot():
 
 
 def is_email_used(email):
-    cursor.execute("SELECT user_id FROM users WHERE user_mail=%s", (email,))
+    cursor.execute("SELECT user_id FROM users WHERE user_mail=?", (email,))
     already_registered = cursor.fetchone()
     return already_registered is not None
 

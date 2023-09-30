@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Dashboard · {{ username }}</title>
+    <title>Tasks</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-4bw+/aepP/YC94hEpVNVgiZdgIC5+VKNBQNGCHeKRQN+PtmoHDEXuppvnDJzQIu9" crossorigin="anonymous">
     <link href='https://fonts.googleapis.com/css?family=Montserrat' rel='stylesheet'>
 <style>
@@ -65,8 +65,18 @@
 
         <div class="row">
             <div class="col-sm-4">
-                <h1 style="font-family: Montserrat;">Dashboard | {{ username }}</h1>
-            </div>
+                    <h2 style="font-family: Montserrat;">Add New Task</h2>
+
+                    <form method="POST" action="/dashboard">
+                        <div class="input-group mb-2">
+                            <input type="text" placeholder="Implement new CSS styles" class="form-control" id="new_task" name="new_task" onkeyup="checkInput()">
+                            <div class="input-group-append">
+                                <button type="submit" class="btn btn-dark" id="track" disabled>Add Task</button>
+                            </div>
+                        </div>
+                    </form>
+
+                </div>
             <div class="col-sm-4">
                 <h1 style="font-family: Montserrat;">Tracked products(NEW);</h1>
 
@@ -88,19 +98,7 @@
 
         <div class="row">
             <div class="col-sm-8">
-                <div class="col-sm-6">
-                    <h2 style="font-family: Montserrat;">Search anything you want</h2>
 
-                    <form method="POST" action="/dashboard">
-                        <div class="input-group mb-2">
-                            <input type="text" placeholder="Renault Twingo" class="form-control" id="product" name="product" onkeyup="checkInput()">
-                            <div class="input-group-append">
-                                <button type="submit" class="btn btn-primary" id="track" disabled>Track</button>
-                            </div>
-                        </div>
-                    </form>
-
-                </div>
                 <div class="col-sm-6">
 
                 </div>
