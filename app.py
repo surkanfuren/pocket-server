@@ -1,4 +1,4 @@
-from flask import Flask, render_template, redirect, request, session, url_for, abort
+from flask import Flask, render_template, redirect, request, session, url_for, abort, jsonify
 from flask_session import Session
 from dotenv import load_dotenv
 from datetime import timedelta
@@ -74,10 +74,31 @@ def tasks():
         new_task = request.form['new_task']
         cursor.execute("INSERT INTO tasks (task_description,task_writer) VALUES (?, ?)", (new_task, session["id"]))
         conn.commit()
-    cursor.execute("SELECT task_description FROM tasks")
+    cursor.execute("SELECT task_id,task_description FROM tasks where isCompleted=0")
     current_tasks = cursor.fetchall()
+    cursor.execute("SELECT task_id,task_description FROM tasks where isCompleted=1")
+    completed_tasks = cursor.fetchall()
 
-    return render_template('pages/tasks.html',current_tasks=current_tasks)
+    return render_template('pages/tasks.html',current_tasks=current_tasks,completed_tasks=completed_tasks)
+
+@app.route('/delete_task/<int:task_id>', methods=['DELETE'])
+def delete_task(task_id):
+    cursor.execute("DELETE FROM tasks WHERE task_id=?",(task_id,))
+    conn.commit()
+    return jsonify({'message': 'Task deleted successfully'}), 200
+@app.route('/done_task/<int:task_id>', methods=['POST'])
+def done_task(task_id):
+    data = request.get_json()
+    new_percentage = int(data['percentage'])
+    print(new_percentage)
+    print(task_id)
+    if new_percentage == 100:
+        cursor.execute("UPDATE tasks SET isCompleted=1,task_percentage=100 WHERE task_id=?", (task_id,))
+        conn.commit()
+    else:
+        cursor.execute("UPDATE tasks SET task_percentage=? WHERE task_id=?",(new_percentage,task_id))
+        conn.commit()
+    return jsonify({'message': 'Task updated successfully','percentage': new_percentage}), 200
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():

@@ -64,25 +64,12 @@
     <div class="container" style="height: 250px;">
 
         <div class="row">
-            <div class="col-sm-4">
+            <div class="col-sm-8">
                 <h1 style="font-family: Montserrat;">Dashboard | {{ username }}</h1>
-            </div>
-            <div class="col-sm-4">
-                <h1 style="font-family: Montserrat;">Tracked products(NEW);</h1>
-
-                <hr>
-                {% for product in products %}
-                    <h4 style="font-family: Montserrat;">Number - {{ product[0] }}</h4>
-                <button type="button" class="btn btn-primary btn-sm">✅</button>
-                <button type="button" class="btn btn-primary btn-sm delete-product-btn data-task-id="{{product[0]}}>🗑️ </button>
-                {% endfor %}
             </div>
             <div class="col-sm-4">
                 <h1 style="font-family: Montserrat;">Tracked products;</h1>
                 <hr>
-                {% for product in products %}
-                    <h4 style="font-family: Montserrat;">{{ product[0] }}</h4>
-                {% endfor %}
             </div>
         </div>
 
@@ -104,6 +91,11 @@
                 <div class="col-sm-6">
 
                 </div>
+            </div>
+            <div class="col-sm-4">
+                {% for product in products %}
+                    <h3 style="font-family: Montserrat;">{{ product[0] }}</h3>
+                {% endfor %}
             </div>
         </div>
 
