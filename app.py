@@ -88,19 +88,11 @@ def delete_task(task_id):
     cursor.execute("DELETE FROM tasks WHERE task_id=?",(task_id,))
     conn.commit()
     return jsonify({'message': 'Task deleted successfully'}), 200
-@app.route('/done_task/<int:task_id>', methods=['POST'])
+@app.route('/done_task/<int:task_id>', methods=['DONE'])
 def done_task(task_id):
-    data = request.get_json()
-    new_percentage = int(data['percentage'])
-    print(new_percentage)
-    print(task_id)
-    if new_percentage == 100:
-        cursor.execute("UPDATE tasks SET isCompleted=1,task_percentage=100 WHERE task_id=?", (task_id,))
-        conn.commit()
-    else:
-        cursor.execute("UPDATE tasks SET task_percentage=? WHERE task_id=?",(new_percentage,task_id))
-        conn.commit()
-    return jsonify({'message': 'Task updated successfully','percentage': new_percentage}), 200
+    cursor.execute("UPDATE tasks SET isCompleted=1,task_percentage=100 WHERE task_id=?", (task_id,))
+    conn.commit()
+    return render_template('pages/tasks.html')
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
