@@ -67,9 +67,11 @@ def index():
     return render_template('pages/index.html')
 @app.route('/tasks',methods=['GET','POST'])
 def tasks():
-
+    print(session.get('role'))
     if not session.get('logged_in'):
         return redirect(url_for('login'))
+    if session.get('role') != "admin":
+        return "Only Developers and Admins can reach this section!"
     if request.method == "POST":
         new_task = request.form['new_task']
         cursor.execute("INSERT INTO tasks (task_description,task_writer) VALUES (?, ?)", (new_task, session["id"]))
@@ -109,6 +111,7 @@ def login():
     session["id"] = None
     session["email"] = None
     session["phone_number"] = None
+    session["role"] = None
     message = None
 
     if request.method == "POST":
@@ -134,6 +137,7 @@ def login():
             session["id"] = user[0]
             session["email"] = user[1]
             session["phone_number"] = user[3]
+            session["role"] = user[4]
             # No use of this now, saving for later use## session.pop('login_attempts', None)
             return redirect(url_for('dashboard'))
 
@@ -163,7 +167,7 @@ def signup():
             empty_message = "Your e-mail can not be empty!"
         else:
             session["mail_in_use"] = False
-            cursor.execute("INSERT INTO users(user_mail,user_pass) VALUES(?, ?)", (email, password))
+            cursor.execute("INSERT INTO users(user_mail,user_pass,Role) VALUES(?, ?,?)", (email, password,"user"))
             conn.commit()
             return redirect("/login")
 
