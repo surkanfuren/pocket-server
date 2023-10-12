@@ -67,21 +67,48 @@ def index():
     return render_template('pages/index.html')
 @app.route('/tasks',methods=['GET','POST'])
 def tasks():
+    message = None
     print(session.get('role'))
     if not session.get('logged_in'):
         return redirect(url_for('login'))
-    if session.get('role') != "admin":
+    if session.get('role') != "admin" and session.get('role') != "dev":
         return "Only Developers and Admins can reach this section!"
     if request.method == "POST":
         new_task = request.form['new_task']
-        cursor.execute("INSERT INTO tasks (task_description,task_writer) VALUES (?, ?)", (new_task, session["id"]))
-        conn.commit()
-    cursor.execute("SELECT task_id,task_description FROM tasks where isCompleted=0")
-    current_tasks = cursor.fetchall()
-    cursor.execute("SELECT task_id,task_description FROM tasks where isCompleted=1")
-    completed_tasks = cursor.fetchall()
+        assign_person = request.form['assign']
+        assign_person.lower()
+        if assign_person == "admin":
+            cursor.execute("INSERT INTO tasks (task_description, task_writer, task_priority) VALUES (?, ?, ?)",
+                           (new_task, session["id"], 1))
+            conn.commit()
 
-    return render_template('pages/tasks.html',current_tasks=current_tasks,completed_tasks=completed_tasks)
+        elif assign_person == "dev":
+            cursor.execute("INSERT INTO tasks (task_description, task_writer, task_priority) VALUES (?, ?, ?)",
+                           (new_task, session["id"], 2))
+            conn.commit()
+
+        elif assign_person == "all":
+            cursor.execute("INSERT INTO tasks (task_description, task_writer, task_priority) VALUES (?, ?, ?)",
+                           (new_task, session["id"], 3))
+            conn.commit()
+
+        else:
+            message = "Unknown person, please use [all, admin or dev] to assign the task."
+    if session.get('role') == "admin":
+        cursor.execute("SELECT task_id,task_description FROM tasks where isCompleted=0")
+        current_tasks = cursor.fetchall()
+        cursor.execute("SELECT task_id,task_description FROM tasks where isCompleted=1")
+        completed_tasks = cursor.fetchall()
+    elif session.get('role') == "dev":
+        task_list =show_mission_for_devs()
+        current_tasks = task_list[0]
+        completed_tasks = task_list[1]
+    else:
+        task_list = show_mission_for_all()
+        current_tasks = task_list[0]
+        completed_tasks = task_list[1]
+
+    return render_template('pages/tasks.html',current_tasks=current_tasks,completed_tasks=completed_tasks,message=message)
 
 @app.route('/delete_task/<int:task_id>', methods=['DELETE'])
 def delete_task(task_id):
@@ -364,8 +391,20 @@ def hash_password(passw):
     sha256.update(passw.encode('utf-8'))
     hashed_password = sha256.hexdigest()
     return hashed_password
-
-
+def show_mission_for_devs():
+    return_list = {}
+    cursor.execute("SELECT task_id,task_description FROM tasks where isCompleted=0 and task_priority>=2")
+    return_list[0] = cursor.fetchall()
+    cursor.execute("SELECT task_id,task_description FROM tasks where isCompleted=1 and task_priority>=2")
+    return_list[1] = cursor.fetchall()
+    return return_list
+def show_mission_for_all():
+    return_list = {}
+    cursor.execute("SELECT task_id,task_description FROM tasks where isCompleted=0 and task_priority>=3")
+    return_list[0] = cursor.fetchall()
+    cursor.execute("SELECT task_id,task_description FROM tasks where isCompleted=1 and task_priority>=3")
+    return_list[1] = cursor.fetchall()
+    return return_list
 def verify(input_code, verification_code):
     is_verified = False
     if input_code == verification_code:

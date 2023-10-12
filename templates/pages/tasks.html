@@ -7,7 +7,7 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-4bw+/aepP/YC94hEpVNVgiZdgIC5+VKNBQNGCHeKRQN+PtmoHDEXuppvnDJzQIu9" crossorigin="anonymous">
     <link href='https://fonts.googleapis.com/css?family=Montserrat' rel='stylesheet'>
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/js/bootstrap.bundle.min.js" integrity="sha384-HwwvtgBNo3bZJJLYd8oVXjrBZt8cqVSpeBNS5n7C8IVInixGAoxmnlMuBnhbgrkm" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/js/bootstrap.bundle.min.js" integrity="sha384-HwwvtgBNo3bZJJLYd8oVXjrBZt8cqVSpeBNS5n7C8IVInixGAoxmnlMuBnhbgrkm" crossorigin="anonymous"></script>
 
 <style>
     .full-width-container {
@@ -71,14 +71,22 @@
                     <h2 style="font-family: Montserrat;">Add New Task</h2>
 
                     <form method="POST" action="/tasks">
-                        <div class="input-group mb-2">
+                        <div class="mb-3">
                             <input type="text" placeholder="Implement new CSS styles" class="form-control" id="new_task" name="new_task">
+                        </div>
+                            <div class="mb-3" style="margin-bottom: 10px;">
+                            <input type="text" placeholder="@Person to assign [ALL/ADMIN/DEV]" class="form-control" name="assign" id="assign">
+                            </div>
                             <div class="input-group-append">
                                 <button type="submit" class="btn btn-dark" id="track">Add Task</button>
                             </div>
-                        </div>
-                    </form>
 
+                    </form>
+<div class="d-flex justify-content-center">
+            {% if message %}
+                      <p>{{ message }}</p>
+                    {% endif %}
+        </div>
                 </div>
             <div class="col-sm-4">
                 <h1 style="font-family: Montserrat;">Current Tasks</h1>
