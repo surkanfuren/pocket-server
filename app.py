@@ -65,6 +65,8 @@ def index():
     if session.get('logged_in'):
         return redirect(url_for('dashboard'))
     return render_template('pages/index.html')
+
+
 @app.route('/tasks',methods=['GET','POST'])
 def tasks():
     message = None
@@ -117,7 +119,7 @@ def delete_task(task_id):
     return jsonify({'message': 'Task deleted successfully'}), 200
 @app.route('/done_task/<int:task_id>', methods=['DONE'])
 def done_task(task_id):
-    cursor.execute("UPDATE tasks SET isCompleted=1,task_percentage=100 WHERE task_id=?", (task_id,))
+    cursor.execute("UPDATE tasks SET isCompleted=1 WHERE task_id=?", (task_id,))
     conn.commit()
     return render_template('pages/tasks.html')
 
