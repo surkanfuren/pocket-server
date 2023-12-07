@@ -1,7 +1,7 @@
 # Starter Docs 📓
 
 ## Adding templates
-Download the templates folder from [here](https://drive.google.com/file/d/1OWO6gnc2ml9vBlD7pVWhbIS6-crOC7Sd/view?usp=sharing) and add to root directory.
+Download the `templates` folder from [here](https://drive.google.com/file/d/1OWO6gnc2ml9vBlD7pVWhbIS6-crOC7Sd/view?usp=sharing) and add it to the root directory.
 
 ## Using redis for session storage
 ```
