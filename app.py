@@ -1,13 +1,13 @@
 from flask import Flask, render_template, redirect, request, session, url_for, abort, jsonify
 from flask_session import Session
 from dotenv import load_dotenv
-from datetime import timedelta
+# from datetime import timedelta
 import requests
 import hashlib
 import sqlite3
-import pymysql
+# import pymysql
 import pyotp
-import redis
+# import redis
 import json
 import os
 
@@ -18,6 +18,9 @@ load_dotenv()
 
 # App Configurations
 app.config['SECRET_KEY'] = os.environ.get('APP_SECRET_KEY')
+
+# Session Configurations
+"""
 app.config['SESSION_TYPE'] = 'redis'
 app.config['SESSION_PERMANENT'] = True
 app.config['SESSION_USE_SIGNER'] = True
@@ -26,6 +29,7 @@ app.config['SESSION_KEY_PREFIX'] = 'fourthand-server-session'
 app.config['SESSION_REDIS'] = redis.StrictRedis(host='localhost', port=6379, db=0)  # Local Redis
 app.config['PERMANENT_SESSION_LIFETIME'] = timedelta(days=30)
 app.config['SESSION_REFRESH_EACH_REQUEST'] = True
+"""
 Session(app)
 
 
@@ -41,9 +45,8 @@ database = os.environ.get('DB_NAME')
 
 
 # Database Connection
-#conn = pymysql.connect(host=endpoint, user=username, password=password, port=3306, database=database)
-#cursor = conn.cursor()
-
+# conn = pymysql.connect(host=endpoint, user=username, password=password, port=3306, database=database)
+# cursor = conn.cursor()
 
 
 try:
@@ -56,7 +59,6 @@ except sqlite3.Error as e:
     cursor = conn.cursor()
 
 
-
 # __________________________________________________ PAGE ROUTES __________________________________________________ #
 
 
@@ -67,7 +69,7 @@ def index():
     return render_template('pages/index.html')
 
 
-@app.route('/tasks',methods=['GET','POST'])
+@app.route('/tasks', methods=['GET', 'POST'])
 def tasks():
     message = None
     print(session.get('role'))
@@ -102,7 +104,7 @@ def tasks():
         cursor.execute("SELECT task_id,task_description FROM tasks where isCompleted=1")
         completed_tasks = cursor.fetchall()
     elif session.get('role') == "dev":
-        task_list =show_mission_for_devs()
+        task_list = show_mission_for_devs()
         current_tasks = task_list[0]
         completed_tasks = task_list[1]
     else:
@@ -110,11 +112,11 @@ def tasks():
         current_tasks = task_list[0]
         completed_tasks = task_list[1]
 
-    return render_template('pages/tasks.html',current_tasks=current_tasks,completed_tasks=completed_tasks,message=message)
+    return render_template('pages/tasks.html', current_tasks=current_tasks, completed_tasks=completed_tasks, message=message)
 
 @app.route('/delete_task/<int:task_id>', methods=['DELETE'])
 def delete_task(task_id):
-    cursor.execute("DELETE FROM tasks WHERE task_id=?",(task_id,))
+    cursor.execute("DELETE FROM tasks WHERE task_id=?", (task_id,))
     conn.commit()
     return jsonify({'message': 'Task deleted successfully'}), 200
 @app.route('/done_task/<int:task_id>', methods=['DONE'])
@@ -188,7 +190,7 @@ def signup():
             empty_message = "Your e-mail can not be empty!"
         else:
             session["mail_in_use"] = False
-            cursor.execute("INSERT INTO users(user_mail,user_pass,Role) VALUES(?, ?,?)", (email, password,"user"))
+            cursor.execute("INSERT INTO users(user_mail,user_pass,Role) VALUES(?, ?,?)", (email, password, "user"))
             conn.commit()
             return redirect("/login")
 
